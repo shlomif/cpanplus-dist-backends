@@ -42,9 +42,9 @@ Readonly my $RPMDIR => do { chomp(my $d=qx[ rpm --eval %_topdir ]); $d; };
 # create and install modules in your environment.
 #
 sub format_available {
-    # check mandriva release file
-    if ( ! -f '/etc/mandriva-release' ) {
-        error( 'not on a mandriva system' );
+    # Check Fedora release file
+    if ( ! -f '/etc/fedora-release' ) {
+        error( 'Not on a Fedora system' );
         return;
     }
 
@@ -52,20 +52,20 @@ sub format_available {
 
     # check rpm tree structure
     if ( ! -d $RPMDIR ) {
-        error( 'need to create rpm tree structure in your home' );
+        error( 'Need to create rpm tree structure in your home' );
         return;
     }
     foreach my $subdir ( qw[ BUILD RPMS SOURCES SPECS SRPMS tmp ] ) {
         my $dir = "$RPMDIR/$subdir";
         next if -d $dir;
-        error( "missing directory '$dir'" );
+        error( "Missing directory '$dir'" );
         $flag++;
     }
 
     # check prereqs
     for my $prog ( qw[ rpm rpmbuild gcc ] ) {
         next if can_run($prog);
-        error( "'$prog' is a required program to build mandriva packages" );
+        error( "'$prog' is a required program to build Fedora packages" );
         $flag++;
     }
 
@@ -274,7 +274,7 @@ sub create {
 
         # unknown error, aborting.
         if ( not $buffer =~ /^\s+Installed .but unpackaged. file.s. found:\n(.*)\z/ms ) {
-            error( "failed to create mandriva package for '$distname': $buffer" );
+            error( "Failed to create Fedora package for '$distname': $buffer" );
             # cpanplus api
             $status->created(0);
             return;
@@ -425,13 +425,13 @@ __DATA__
 
 %define realname   DISTNAME
 %define version    DISTVERS
-%define release    %mkrel 1
+%define release    1%{?dist}
 
 Name:       perl-%{realname}
 Version:    %{version}
 Release:    %{release}
-License:    GPL or Artistic
-Group:      Development/Perl
+License:    GPL+ or Artistic
+Group:      Development/Libraries
 Summary:    DISTSUMMARY
 Source:     http://www.cpan.org/modules/by-module/DISTTOPLEVEL/%{realname}-%{version}.DISTEXTENSION
 Url:        http://search.cpan.org/dist/%{realname}
@@ -449,17 +449,23 @@ DISTDESCR
 
 %build
 %{__perl} Makefile.PL INSTALLDIRS=vendor
-%make
+make %{?_smp_mflags}
 
 %check
 make test
 
 %install
-rm -rf %buildroot
-%makeinstall_std
+rm -rf $RPM_BUILD_ROOT
+
+make pure_install PERL_INSTALL_ROOT=$RPM_BUILD_ROOT
+
+find $RPM_BUILD_ROOT -type f -name .packlist -exec rm -f {} \;
+find $RPM_BUILD_ROOT -depth -type d -exec rmdir {} 2>/dev/null \;
+
+%{_fixperms} $RPM_BUILD_ROOT/*
 
 %clean
-rm -rf %buildroot
+rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root)
@@ -469,7 +475,7 @@ DISTDOC
 DISTEXTRA
 
 %changelog
-* DISTDATE cpan2dist DISTVERS-1mdv
+* DISTDATE cpan2dist DISTVERS-1
 - initial mdv release, generated with cpan2dist
 
 __END__
