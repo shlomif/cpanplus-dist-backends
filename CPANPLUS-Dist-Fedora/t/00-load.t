@@ -1,6 +1,6 @@
 #!perl
 #
-# This file is part of CPANPLUS::Dist::Mdv.
+# This file is part of CPANPLUS::Dist::Fedora.
 # Copyright (c) 2007 Jerome Quelin, all rights reserved.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -13,7 +13,7 @@ use warnings;
 
 use Test::More tests => 1;
 
-require_ok( 'CPANPLUS::Dist::Mdv' );
-diag( "Testing CPANPLUS::Dist::Mdv $CPANPLUS::Dist::Mdv::VERSION, Perl $], $^X" );
+require_ok( 'CPANPLUS::Dist::Fedora' );
+diag( "Testing CPANPLUS::Dist::Fedora $CPANPLUS::Dist::Fedora::VERSION, Perl $], $^X" );
 
 exit;

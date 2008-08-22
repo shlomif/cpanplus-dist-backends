@@ -1,12 +1,12 @@
 #
-# This file is part of CPANPLUS::Dist::Mdv.
+# This file is part of CPANPLUS::Dist::Fedora.
 # Copyright (c) 2007 Jerome Quelin, all rights reserved.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the same terms as Perl itself.
 #
 
-package CPANPLUS::Dist::Mdv;
+package CPANPLUS::Dist::Fedora;
 
 use strict;
 use warnings;
@@ -26,7 +26,7 @@ use Readonly;
 use Text::Wrap;
 
 
-our $VERSION = '0.3.7';
+our $VERSION = '0.0.1';
 
 Readonly my $DATA_OFFSET => tell(DATA);
 Readonly my $RPMDIR => do { chomp(my $d=qx[ rpm --eval %_topdir ]); $d; };
@@ -36,7 +36,7 @@ Readonly my $RPMDIR => do { chomp(my $d=qx[ rpm --eval %_topdir ]); $d; };
 # class methods
 
 #
-# my $bool = CPANPLUS::Dist::Mdv->format_available;
+# my $bool = CPANPLUS::Dist::Fedora->format_available;
 #
 # Return a boolean indicating whether or not you can use this package to
 # create and install modules in your environment.
@@ -76,9 +76,9 @@ sub format_available {
 # public methods
 
 #
-# my $bool = $mdv->init;
+# my $bool = $fedora->init;
 #
-# Sets up the C<CPANPLUS::Dist::Mdv> object for use, and return true if
+# Sets up the C<CPANPLUS::Dist::Fedora> object for use, and return true if
 # everything went fine.
 #
 sub init {
@@ -477,19 +477,19 @@ __END__
 
 =head1 NAME
 
-CPANPLUS::Dist::Mdv - a cpanplus backend to build mandriva rpms
+CPANPLUS::Dist::Fedora - a cpanplus backend to build Fedora/Red Hat rpms
 
 
 
 =head1 SYNOPSYS
 
-    cpan2dist --format=CPANPLUS::Dist::Mdv Some::Random::Package
+    cpan2dist --format=CPANPLUS::Dist::Fedora Some::Random::Package
 
 
 
 =head1 DESCRIPTION
 
-CPANPLUS::Dist::Mdv is a distribution class to create mandriva packages
+CPANPLUS::Dist::Fedora is a distribution class to create FEdora packages
 from CPAN modules, and all its dependencies. This allows you to have
 the most recent copies of CPAN modules installed, using your package
 manager of choice, but without having to wait for central repositories
@@ -497,10 +497,6 @@ to be updated.
 
 You can either install them using the API provided in this package, or
 manually via rpm.
-
-Some of the bleading edge CPAN modules have already been turned into
-mandriva packages for you, and you can make use of them by adding the
-cooker repositories (main & contrib).
 
 Note that these packages are built automatically from CPAN and are
 assumed to have the same license as perl and come without support.
@@ -510,7 +506,7 @@ Please always refer to the original CPAN package if you have questions.
 
 =head1 CLASS METHODS
 
-=head2 $bool = CPANPLUS::Dist::Mdv->format_available;
+=head2 $bool = CPANPLUS::Dist::Fedora->format_available;
 
 Return a boolean indicating whether or not you can use this package to
 create and install modules in your environment.
@@ -524,15 +520,15 @@ C<gcc>.
 
 =head1 PUBLIC METHODS
 
-=head2 $bool = $mdv->init;
+=head2 $bool = $fedora->init;
 
-Sets up the C<CPANPLUS::Dist::Mdv> object for use. Effectively creates
+Sets up the C<CPANPLUS::Dist::Fedora> object for use. Effectively creates
 all the needed status accessors.
 
 Called automatically whenever you create a new C<CPANPLUS::Dist> object.
 
 
-=head2 $bool = $mdv->prepare;
+=head2 $bool = $fedora->prepare;
 
 Prepares a distribution for creation. This means it will create the rpm
 spec file needed to build the rpm and source rpm. This will also satisfy
@@ -544,22 +540,22 @@ since it relies on pod parsing to find those information.
 
 Returns true on success and false on failure.
 
-You may then call C<< $mdv->create >> on the object to create the rpm
-from the spec file, and then C<< $mdv->install >> on the object to
+You may then call C<< $fedora->create >> on the object to create the rpm
+from the spec file, and then C<< $fedora->install >> on the object to
 actually install it.
 
 
-=head2 $bool = $mdv->create;
+=head2 $bool = $fedora->create;
 
 Builds the rpm file from the spec file created during the C<create()>
 step.
 
 Returns true on success and false on failure.
 
-You may then call C<< $mdv->install >> on the object to actually install it.
+You may then call C<< $fedora->install >> on the object to actually install it.
 
 
-=head2 $bool = $mdv->install;
+=head2 $bool = $fedora->install;
 
 Installs the rpm using C<rpm -U>.
 
@@ -597,9 +593,9 @@ name of the module.
 
 =head1 BUGS
 
-Please report any bugs or feature requests to C<< < cpanplus-dist-mdv at
+Please report any bugs or feature requests to C<< < cpanplus-dist-fedora at
 rt.cpan.org> >>, or through the web interface at
-L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=CPANPLUS-Dist-Mdv>.  I
+L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=CPANPLUS-Dist-Fedora>.  I
 will be notified, and then you'll automatically be notified of progress
 on your bug as I make changes.
 
@@ -608,11 +604,12 @@ on your bug as I make changes.
 =head1 SEE ALSO
 
 L<CPANPLUS::Backend>, L<CPANPLUS::Module>, L<CPANPLUS::Dist>,
-C<cpan2dist>, C<rpm>, C<urpmi>
+C<cpan2dist>, C<rpm>, C<yum>
 
 
-C<CPANPLUS::Dist::Mdv> development takes place on
-L<http://repo.or.cz/w/cpanplus-dist-mdv.git> - feel free to join us.
+C<CPANPLUS::Dist::Fedora> development takes place on
+L<https://svn.berlios.de/svnroot/repos/web-cpan/CPANPLUS-Dist/trunk/> 
+- feel free to join us.
 
 
 You can also look for information on this module at:
@@ -621,15 +618,15 @@ You can also look for information on this module at:
 
 =item * AnnoCPAN: Annotated CPAN documentation
 
-L<http://annocpan.org/dist/CPANPLUS-Dist-Mdv>
+L<http://annocpan.org/dist/CPANPLUS-Dist-Fedora>
 
 =item * CPAN Ratings
 
-L<http://cpanratings.perl.org/d/CPANPLUS-Dist-Mdv>
+L<http://cpanratings.perl.org/d/CPANPLUS-Dist-Fedora>
 
 =item * RT: CPAN's request tracker
 
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=CPANPLUS-Dist-Mdv>
+L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=CPANPLUS-Dist-Fedora>
 
 =back
 
@@ -637,9 +634,12 @@ L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=CPANPLUS-Dist-Mdv>
 
 =head1 AUTHOR
 
+Originally based on CPANPLUS-Dist-Mdv by:
+
 Jerome Quelin, C<< <jquelin at cpan.org> >>
 
-
+Shlomi Fish ( L<http://www.shlomifish.org/> ) changed it into 
+CPANPLUS-Dist-Fedora.
 
 =head1 COPYRIGHT & LICENSE
 
@@ -648,6 +648,7 @@ Copyright (c) 2007 Jerome Quelin, all rights reserved.
 This program is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
 
+Modified by Shlomi Fish, 2008 - all ownership disclaimed.
 
 =cut
 

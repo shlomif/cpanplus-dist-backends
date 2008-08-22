@@ -1,6 +1,6 @@
 #!perl
 #
-# This file is part of CPANPLUS::Dist::Mdv.
+# This file is part of CPANPLUS::Dist::Fedora.
 # Copyright (c) 2007 Jerome Quelin, all rights reserved.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -14,10 +14,10 @@ use warnings;
 use ExtUtils::MakeMaker;
 
 WriteMakefile(
-    NAME                => 'CPANPLUS::Dist::Mdv',
-    AUTHOR              => 'Jerome Quelin <jquelin@cpan.org>',
-    VERSION_FROM        => 'lib/CPANPLUS/Dist/Mdv.pm',
-    ABSTRACT_FROM       => 'lib/CPANPLUS/Dist/Mdv.pm',
+    NAME                => 'CPANPLUS::Dist::Fedora',
+    AUTHOR              => 'Shlomi Fish <shlomif@cpan.org>',
+    VERSION_FROM        => 'lib/CPANPLUS/Dist/Fedora.pm',
+    ABSTRACT_FROM       => 'lib/CPANPLUS/Dist/Fedora.pm',
     PL_FILES            => {},
     PREREQ_PM => {
         'CPANPLUS'             => 0,
@@ -31,7 +31,7 @@ WriteMakefile(
     },
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean => { FILES => [
-                'CPANPLUS-Dist-Mdv-*', 'MANIFEST.bak',
+                'CPANPLUS-Dist-Fedora-*', 'MANIFEST.bak',
                 map { ( '*/' x $_ ) . '*~' } 0..5
         ] },
 );

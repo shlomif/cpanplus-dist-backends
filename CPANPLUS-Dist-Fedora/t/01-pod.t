@@ -1,6 +1,6 @@
 #!perl
 #
-# This file is part of CPANPLUS::Dist::Mdv.
+# This file is part of CPANPLUS::Dist::Fedora.
 # Copyright (c) 2007 Jerome Quelin, all rights reserved.
 #
 # This program is free software; you can redistribute it and/or modify
