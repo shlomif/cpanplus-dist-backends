@@ -5,6 +5,8 @@ author:
   - 'Shlomi Fish <shlomif@cpan.org>'
 abstract: a cpanplus backend to build Fedora/Red Hat rpms
 license: perl
+resources:
+  license: http://dev.perl.org/licenses/
 requires:
   CPANPLUS: 0
   File::Slurp: 0
@@ -27,13 +29,11 @@ build_requires:
 recommends:
   Test::Pod: 0
   Test::Pod::Coverage: 0
-generated_by: Module::Build version 0.2808
-meta-spec:
-  url: http://module-build.sourceforge.net/META-spec-v1.2.html
-  version: 1.2
 provides:
   CPANPLUS::Dist::Fedora:
     file: lib/CPANPLUS/Dist/Fedora.pm
     version: 0.0.1
-resources:
-  license: http://dev.perl.org/licenses/
+generated_by: Module::Build version 0.2808
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.2.html
+  version: 1.2
