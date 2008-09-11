@@ -22,30 +22,30 @@ my $builder = Module::Build->new (
         map { ( '*/' x $_ ) . '*~' } 0..5 ],
     script_files   => [ ],
     build_requires => {
-        'CPANPLUS'             => 0,
-        'File::Slurp'          => 0,
-        'IPC::Cmd'             => 0,
-        'Pod::POM'             => 0,
-        'Pod::POM::View::Text' => 0,
-        'POSIX'                => 0,
-        'Readonly'             => 0,
         'Test::More'           => 0,
         'perl'                 => '5.008',
     },
     requires       => {
         'CPANPLUS'             => 0,
+        'CPANPLUS::Dist::Base' => 0,
+        'CPANPLUS::Error'      => 0,
+        'File::Basename'       => 0,
+        'File::Copy'           => 0,
         'File::Slurp'          => 0,
         'IPC::Cmd'             => 0,
         'Pod::POM'             => 0,
         'Pod::POM::View::Text' => 0,
         'POSIX'                => 0,
         'Readonly'             => 0,
+        'Text::Wrap'           => 0,
+        'Template'             => 0,
         'perl'                 => '5.008',
     },
     recommends     => {
         'Test::Pod'           => 0,
         'Test::Pod::Coverage' => 0,
     },
+    create_makefile_pl => "traditional",
 );
 
 $builder->create_build_script();

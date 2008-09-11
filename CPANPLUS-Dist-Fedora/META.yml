@@ -3,27 +3,26 @@ name: CPANPLUS-Dist-Fedora
 version: 0.0.1
 author:
   - 'Shlomi Fish <shlomif@cpan.org>'
-abstract: a cpanplus backend to build Fedora/Red Hat rpms
+abstract: a cpanplus backend to build Fedora/RedHat rpms
 license: perl
 resources:
   license: http://dev.perl.org/licenses/
 requires:
   CPANPLUS: 0
+  CPANPLUS::Dist::Base: 0
+  CPANPLUS::Error: 0
+  File::Basename: 0
+  File::Copy: 0
   File::Slurp: 0
   IPC::Cmd: 0
   POSIX: 0
   Pod::POM: 0
   Pod::POM::View::Text: 0
   Readonly: 0
+  Template: 0
+  Text::Wrap: 0
   perl: 5.008
 build_requires:
-  CPANPLUS: 0
-  File::Slurp: 0
-  IPC::Cmd: 0
-  POSIX: 0
-  Pod::POM: 0
-  Pod::POM::View::Text: 0
-  Readonly: 0
   Test::More: 0
   perl: 5.008
 recommends:
