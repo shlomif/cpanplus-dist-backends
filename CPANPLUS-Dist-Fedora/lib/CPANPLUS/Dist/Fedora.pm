@@ -13,6 +13,7 @@ use warnings;
 
 use base 'CPANPLUS::Dist::Base';
 
+use Cwd;
 use CPANPLUS::Error; # imported subs: error(), msg()
 use File::Basename;
 use File::Copy      qw[ copy ];
@@ -21,16 +22,89 @@ use IPC::Cmd        qw[ run can_run ];
 use List::Util      qw[ first ];
 use Pod::POM;
 use Pod::POM::View::Text;
-use POSIX ();
+use POSIX qw[ strftime ];
 use Readonly;
 use Text::Wrap;
-
+use Template;
 
 our $VERSION = '0.0.1';
 
-Readonly my $DATA_OFFSET => tell(DATA);
 Readonly my $RPMDIR => do { chomp(my $d=qx[ rpm --eval %_topdir ]); $d; };
+Readonly my $PACKAGER => 
+    do { my $d = `rpm --eval '%{packager}'`; chomp $d; $d };
+Readonly my $DEFAULT_LICENSE => 'CHECK(GPL+ or Artistic)';
+Readonly my $DIR => cwd;
 
+# Dealing with DATA gets increasingly messy, IMHO
+Readonly my $SPEC_TEMPLATE => <<'END_SPEC';
+
+Name:       [% status.rpmname %] 
+Version:    [% status.distvers %] 
+Release:    [% status.rpmvers %]%{?dist}
+License:    [% status.license %] 
+Group:      Development/Libraries
+Summary:    [% status.summary %] 
+Source:     http://search.cpan.org/CPAN/[% module.path %]/[% status.distname %]-%{version}.[% module.package_extension %] 
+Url:        http://search.cpan.org/dist/[% status.distname %]
+BuildRoot:  %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n) 
+Requires:  perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
+[% IF status.is_noarch %]BuildArch:  noarch[% END -%]
+
+BuildRequires: perl(ExtUtils::MakeMaker) 
+[% brs = buildreqs; FOREACH br = brs.keys.sort -%]
+BuildRequires: perl([% br %])[% IF (brs.$br != 0) %] >= [% brs.$br %][% END %]
+[% END -%]
+
+
+%description
+[% status.description -%]
+
+
+%prep
+%setup -q -n [% status.distname %]-%{version}
+
+%build
+[% IF (!status.is_noarch) -%]
+%{__perl} Makefile.PL INSTALLDIRS=vendor OPTIMIZE="%{optflags}"
+[% ELSE -%]
+%{__perl} Makefile.PL INSTALLDIRS=vendor
+[% END -%]
+make %{?_smp_mflags}
+
+%install
+rm -rf %{buildroot}
+
+make pure_install PERL_INSTALL_ROOT=%{buildroot}
+find %{buildroot} -type f -name .packlist -exec rm -f {} ';'
+[% IF (!status.is_noarch) -%]
+find %{buildroot} -type f -name '*.bs' -a -size 0 -exec rm -f {} ';'
+[% END -%]
+find %{buildroot} -depth -type d -exec rmdir {} 2>/dev/null ';'
+
+%{_fixperms} %{buildroot}/*
+
+%check
+make test
+
+%clean
+rm -rf %{buildroot} 
+
+%files
+%defattr(-,root,root,-)
+%doc [% docfiles %] 
+[% IF (status.is_noarch) -%]
+%{perl_vendorlib}/*
+[% ELSE -%]
+%{perl_vendorarch}/*
+%exclude %dir %{perl_vendorarch}/auto
+[% END -%]
+%{_mandir}/man3/*.3*
+
+%changelog
+* [% date %] [% packager %] [% status.distvers %]-[% status.rpmvers %]
+- initial Fedora packaging
+- generated with cpan2dist (CPANPLUS::Dist::Fedora version [% packagervers %])
+END_SPEC
 
 #--
 # class methods
@@ -49,18 +123,6 @@ sub format_available {
     }
 
     my $flag;
-
-    # check rpm tree structure
-    if ( ! -d $RPMDIR ) {
-        error( 'Need to create rpm tree structure in your home' );
-        return;
-    }
-    foreach my $subdir ( qw[ BUILD RPMS SOURCES SPECS SRPMS tmp ] ) {
-        my $dir = "$RPMDIR/$subdir";
-        next if -d $dir;
-        error( "Missing directory '$dir'" );
-        $flag++;
-    }
 
     # check prereqs
     for my $prog ( qw[ rpm rpmbuild gcc ] ) {
@@ -87,26 +149,34 @@ sub init {
     # distname: Foo-Bar
     # distvers: 1.23
     # extra_files: qw[ /bin/foo /usr/bin/bar ] 
-    # rpmname:  perl-Foo-Bar
-    # rpmpath:  $RPMDIR/RPMS/noarch/perl-Foo-Bar-1.23-1mdv2008.0.noarch.rpm
-    # rpmvers:  1
-    # srpmpath: $RPMDIR/SRPMS/perl-Foo-Bar-1.23-1mdv2008.0.src.rpm
-    # specpath: $RPMDIR/SPECS/perl-Foo-Bar.spec
-    $status->mk_accessors(qw[ distname distvers extra_files rpmname rpmpath
-        rpmvers srpmpath specpath ]);
+    # rpmname:     perl-Foo-Bar
+    # rpmpath:     $RPMDIR/RPMS/noarch/perl-Foo-Bar-1.23-1mdv2008.0.noarch.rpm
+    # rpmvers:     1
+    # rpmdir:      $DIR
+    # srpmpath:    $RPMDIR/SRPMS/perl-Foo-Bar-1.23-1mdv2008.0.src.rpm
+    # specpath:    $RPMDIR/SPECS/perl-Foo-Bar.spec
+    # is_noarch:   true if pure-perl
+    # license:     try to figure out the actual license
+    # summary:     one-liner summary
+    # description: a paragraph summary or so
+    $status->mk_accessors(
+        qw[ distname distvers extra_files rpmname rpmpath rpmvers rpmdir
+            srpmpath specpath is_noarch license summary description        
+          ]
+    );
 
     return 1;
 }
 
 sub prepare {
     my ($self, %args) = @_;
-    my $status = $self->status;               # private hash
+    my $status = $self->status;               # Private hash
     my $module = $self->parent;               # CPANPLUS::Module
     my $intern = $module->parent;             # CPANPLUS::Internals
     my $conf   = $intern->configure_object;   # CPANPLUS::Configure
     my $distmm = $module->status->dist_cpan;  # CPANPLUS::Dist::MM
 
-    # parse args.
+    # Parse args.
     my %opts = (
         force   => $conf->get_conf('force'),  # force rebuild
         perl    => $^X,
@@ -114,36 +184,44 @@ sub prepare {
         %args,
     );
 
-    # dry-run with makemaker: find build prereqs.
+    # Dry-run with makemaker: find build prereqs.
     msg( "dry-run prepare with makemaker..." );
     $self->SUPER::prepare( %args );
 
-    # compute & store package information
+    # Compute & store package information
     my $distname    = $module->package_name;
-    $status->distname( $distname );
-    my $distvers    = $module->package_version;
-    my $distext     = $module->package_extension;
-    my $distsummary    = _module_summary($module);
-    my $distdescr      = _module_description($module);
-    #my $distlicense    =
-    my ($disttoplevel) = $module->name=~ /([^:]+)::/;
-    my @reqs           = sort keys %{ $module->status->prereqs };
-    push @reqs, 'Module::Build::Compat' if _is_module_build_compat($module);
-    my $distbreqs      = join "\n", map { "BuildRequires: perl($_)" } @reqs;
+    $status->distname($distname);
+    $status->distvers($module->package_version);
+    $status->summary(_module_summary($module));
+    $status->description(_module_description($module));
+    $status->license(_module_license($module));
+    #$status->disttop($module->name=~ /([^:]+)::/);
+    my $dir = $status->rpmdir($DIR);
+    $status->rpmvers(1);
+
+    # Cache files
+    my @files = @{ $module->status->files };
+
+    # Handle build/test/requires
+    my $buildreqs = $module->status->prereqs;
+    $buildreqs->{'Module::Build::Compat'} = 0
+        if _is_module_build_compat($module);
+
+    # Files for %doc
     my @docfiles =
         grep { /(README|Change(s|log)|LICENSE)$/i }
         map { basename $_ }
-        @{ $module->status->files };
-    my $distarch =
-        defined( first { /\.(c|xs)$/i } @{ $module->status->files } )
-        ? '' : 'BuildArch: noarch';
+        @files
+        ;
+
+    # Figure out if we're noarch or not
+    $status->is_noarch(do { first { /\.(c|xs)$/i } @files } ? 0 : 1);
 
     my $rpmname = _mk_pkg_name($distname);
     $status->rpmname( $rpmname );
 
-
     # check whether package has been build.
-    if ( my $pkg = $self->_has_been_build($rpmname, $distvers) ) {
+    if ( my $pkg = $self->_has_been_built($rpmname, $status->distvers) ) {
         my $modname = $module->module;
         msg( "already created package for '$modname' at '$pkg'" );
 
@@ -165,42 +243,33 @@ sub prepare {
         msg( "writing specfile for '$distname'..." );
     }
 
-    # compute & store path of specfile.
-    my $spec = "$RPMDIR/SPECS/$rpmname.spec";
-    $status->specpath($spec);
+    # Compute & store path of specfile.
+    $status->specpath("$dir/$rpmname.spec");
 
-    my $vers = $module->version;
+    # Prepare our template
+    my $tmpl = Template->new({ EVAL_PERL => 1 });
+    
+    # Process template into spec
+    $tmpl->process(
+        \$SPEC_TEMPLATE, 
+        {
+            status    => $status,
+            module    => $module,
+            buildreqs => $buildreqs,
+            date      => strftime("%a %b %d %Y", localtime),
+            packager  => $PACKAGER,
+            docfiles  => join(' ', @docfiles),
 
-    # writing the spec file.
-    seek DATA, $DATA_OFFSET, 0;
-    my $specfh;
-    if ( not open $specfh, '>', $spec ) {
-        error( "can't open '$spec': $!" );
-        return;
-    }
-    while ( defined( my $line = <DATA> ) ) {
-        last if $line =~ /^__END__$/;
-
-        $line =~ s/DISTNAME/$distname/;
-        $line =~ s/DISTVERS/$distvers/g;
-        $line =~ s/DISTSUMMARY/$distsummary/;
-        $line =~ s/DISTEXTENSION/$distext/;
-        $line =~ s/DISTARCH/$distarch/;
-        $line =~ s/DISTBUILDREQUIRES/$distbreqs/;
-        $line =~ s/DISTDESCR/$distdescr/;
-        $line =~ s/DISTDOC/@docfiles ? "%doc @docfiles" : ''/e;
-        $line =~ s/DISTTOPLEVEL/$disttoplevel/;
-        $line =~ s/DISTEXTRA/join( "\n", @{ $status->extra_files || [] })/e;
-        $line =~ s/DISTDATE/POSIX::strftime("%a %b %d %Y", localtime())/e;
-
-        print $specfh $line;
-    }
-    close $specfh;
+            packagervers => $VERSION,
+            # s/DISTEXTRA/join( "\n", @{ $status->extra_files || [] })/e;
+            # ... FIXME
+        },
+        $status->specpath,
+    );
 
     # copy package.
-    my $basename = basename $module->status->fetch;
-    my $tarball = "$RPMDIR/SOURCES/$basename";
-    copy( $module->status->fetch, $tarball );
+    my $tarball = "$dir/" . basename $module->status->fetch;
+    copy $module->status->fetch, $tarball;
 
     msg( "specfile for '$distname' written" );
     # return success
@@ -244,14 +313,22 @@ sub create {
         my $distname = $status->distname;
         my $rpmname  = $status->rpmname;
 
-        msg( "building '$distname' from specfile..." );
+        msg( "Building '$distname' from specfile $spec..." );
 
         # dry-run, to see if we forgot some files
         my ($buffer, $success);
+        my $dir = $status->rpmdir;
         DRYRUN: {
             local $ENV{LC_ALL} = 'C';
             $success = run(
-                command => "rpmbuild -ba --quiet $spec",
+                #command => "rpmbuild -ba --quiet $spec",
+                command => 
+                    'rpmbuild -ba '
+                    . qq{--define '_sourcedir $dir' }
+                    . qq{--define '_builddir $dir'  }
+                    . qq{--define '_srcrpmdir $dir' }
+                    . qq{--define '_rpmdir $dir'    }
+                    . $spec,
                 verbose => $opts{verbose},
                 buffer  => \$buffer,
             );
@@ -259,10 +336,10 @@ sub create {
 
         # check if the dry-run finished correctly
         if ( $success ) {
-            my ($rpm)  = (sort glob "$RPMDIR/RPMS/*/$rpmname-*.rpm")[-1];
-            my ($srpm) = (sort glob "$RPMDIR/SRPMS/$rpmname-*.src.rpm")[-1];
-            msg( "rpm created successfully: $rpm" );
-            msg( "srpm available: $srpm" );
+            my ($rpm)  = (sort glob "$dir/*/$rpmname-*.rpm")[-1];
+            my ($srpm) = (sort glob "$dir/$rpmname-*.src.rpm")[-1];
+            msg( "RPM created successfully: $rpm" );
+            msg( "SRPM available: $srpm" );
             # c::d::mdv store
             $status->rpmpath($rpm);
             $status->srpmpath($srpm);
@@ -303,14 +380,14 @@ sub install {
 
 
 #--
-# private methods
+# Private methods:
 
 #
-# my $bool = $self->_has_been_build;
+# my $bool = $self->_has_been_built;
 #
-# return true if there's already a package build for this module.
+# Returns true if there's already a package built for this module.
 # 
-sub _has_been_build {
+sub _has_been_built {
     my ($self, $name, $vers) = @_;
     my $pkg = ( sort glob "$RPMDIR/RPMS/*/$name-$vers-*.rpm" )[-1];
     return $pkg;
@@ -319,7 +396,7 @@ sub _has_been_build {
 
 
 #--
-# private subs
+# Private subs
 
 sub _is_module_build_compat {
     my ($module) = @_;
@@ -342,7 +419,11 @@ sub _mk_pkg_name {
     return $name;
 }
 
+# determine the module license. 
+#
+# FIXME! for now just return $DEFAULT_LICENSE
 
+sub _module_license { return $DEFAULT_LICENSE; }
 
 #
 # my $description = _module_description($module);
@@ -421,73 +502,15 @@ sub _module_summary {
 
 1;
 
-__DATA__
-
-%define realname   DISTNAME
-%define version    DISTVERS
-%define release    1%{?dist}
-
-Name:       perl-%{realname}
-Version:    %{version}
-Release:    %{release}
-License:    GPL+ or Artistic
-Group:      Development/Libraries
-Summary:    DISTSUMMARY
-Source:     http://www.cpan.org/modules/by-module/DISTTOPLEVEL/%{realname}-%{version}.DISTEXTENSION
-Url:        http://search.cpan.org/dist/%{realname}
-BuildRoot:  %{_tmppath}/%{name}-%{version}-%{release}-buildroot
-BuildRequires: perl-devel
-DISTBUILDREQUIRES
-
-DISTARCH
-
-%description
-DISTDESCR
-
-%prep
-%setup -q -n %{realname}-%{version} 
-
-%build
-%{__perl} Makefile.PL INSTALLDIRS=vendor
-make %{?_smp_mflags}
-
-%check
-make test
-
-%install
-rm -rf $RPM_BUILD_ROOT
-
-make pure_install PERL_INSTALL_ROOT=$RPM_BUILD_ROOT
-
-find $RPM_BUILD_ROOT -type f -name .packlist -exec rm -f {} \;
-find $RPM_BUILD_ROOT -depth -type d -exec rmdir {} 2>/dev/null \;
-
-%{_fixperms} $RPM_BUILD_ROOT/*
-
-%clean
-rm -rf $RPM_BUILD_ROOT
-
-%files
-%defattr(-,root,root)
-DISTDOC
-%{_mandir}/man3/*
-%perl_vendorlib/*
-DISTEXTRA
-
-%changelog
-* DISTDATE cpan2dist DISTVERS-1
-- initial mdv release, generated with cpan2dist
-
 __END__
-
 
 =head1 NAME
 
-CPANPLUS::Dist::Fedora - a cpanplus backend to build Fedora/Red Hat rpms
+CPANPLUS::Dist::Fedora - a cpanplus backend to build Fedora/RedHat rpms
 
 
 
-=head1 SYNOPSYS
+=head1 SYNOPSIS
 
     cpan2dist --format=CPANPLUS::Dist::Fedora Some::Random::Package
 
@@ -495,7 +518,7 @@ CPANPLUS::Dist::Fedora - a cpanplus backend to build Fedora/Red Hat rpms
 
 =head1 DESCRIPTION
 
-CPANPLUS::Dist::Fedora is a distribution class to create FEdora packages
+CPANPLUS::Dist::Fedora is a distribution class to create Fedora packages
 from CPAN modules, and all its dependencies. This allows you to have
 the most recent copies of CPAN modules installed, using your package
 manager of choice, but without having to wait for central repositories
@@ -655,6 +678,8 @@ This program is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
 
 Modified by Shlomi Fish, 2008 - all ownership disclaimed.
+
+Modified again by Chris Weyl <cweyl@alumni.drew.edu> 2008.
 
 =cut
 
