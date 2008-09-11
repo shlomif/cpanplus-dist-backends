@@ -2,6 +2,15 @@ Revision history for CPANPLUS-Dist-Fedora
 
 ( CPANPLUS-Dist-Mdv changes below. )
 
+0.0.2 TODO: FILL IN.
+ - Applied a modified version of Chris Weyl's patch to 
+ lib/CPANPLUS/Dist/Fedora.pm :
+    - generate the spec using Template Toolkit.
+    - adapted to some Fedora conventions.
+    - fixed some missing capitalisation.
+ - Made sure the 'requires' in Build.PL are not present in 'build_requires'.
+ - Now generating Makefile.PL from Build.PL.
+
 0.0.1 Sat Aug 23 01:23:56 IDT 2008
  - Forked from CPANPLUS-Dist-Mdv-0.3.7.
  - Adapted to Fedora.
