@@ -27,7 +27,7 @@ use Readonly;
 use Text::Wrap;
 use Template;
 
-our $VERSION = '0.0.1';
+our $VERSION = '0.0.2';
 
 Readonly my $RPMDIR => do { chomp(my $d=qx[ rpm --eval %_topdir ]); $d; };
 Readonly my $PACKAGER => 
