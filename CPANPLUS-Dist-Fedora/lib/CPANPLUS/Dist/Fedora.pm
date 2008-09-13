@@ -29,9 +29,6 @@ use Template;
 
 our $VERSION = '0.0.2';
 
-Readonly my $RPMDIR => do { chomp(my $d=qx[ rpm --eval %_topdir ]); $d; };
-Readonly my $PACKAGER => 
-    do { my $d = `rpm --eval '%{packager}'`; chomp $d; $d };
 Readonly my $DEFAULT_LICENSE => 'CHECK(GPL+ or Artistic)';
 Readonly my $DIR => cwd;
 
@@ -257,7 +254,7 @@ sub prepare {
             module    => $module,
             buildreqs => $buildreqs,
             date      => strftime("%a %b %d %Y", localtime),
-            packager  => $PACKAGER,
+            packager  => $self->_get_packager(),
             docfiles  => join(' ', @docfiles),
 
             packagervers => $VERSION,
@@ -389,6 +386,7 @@ sub install {
 # 
 sub _has_been_built {
     my ($self, $name, $vers) = @_;
+    my $RPMDIR = $self->_get_RPMDIR();
     my $pkg = ( sort glob "$RPMDIR/RPMS/*/$name-$vers-*.rpm" )[-1];
     return $pkg;
     # FIXME: should we check cooker?
@@ -500,6 +498,34 @@ sub _module_summary {
     return 'no summary found';
 }
 
+sub _get_RPMDIR
+{
+    my $self = shift;
+
+    # Memoize it.
+    if (!defined($self->{_RPMDIR}))
+    {
+        chomp(my $d=qx[ rpm --eval %_topdir ]);
+        $self->{_RPMDIR} = $d;
+    }
+
+    return $self->{_RPMDIR};
+}
+
+sub _get_packager
+{
+    my $self = shift;
+
+    # Memoize it.
+    if (!defined($self->{_packager}))
+    {
+        my $d = `rpm --eval '%{packager}'`; 
+        chomp $d;
+        $self->{_packager} = $d;
+    }
+
+    return $self->{_packager};
+}
 1;
 
 __END__
