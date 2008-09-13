@@ -29,7 +29,6 @@ use Template;
 
 our $VERSION = '0.0.2';
 
-Readonly my $DEFAULT_LICENSE => 'CHECK(GPL+ or Artistic)';
 Readonly my $DIR => cwd;
 
 # Dealing with DATA gets increasingly messy, IMHO
@@ -419,9 +418,19 @@ sub _mk_pkg_name {
 
 # determine the module license. 
 #
-# FIXME! for now just return $DEFAULT_LICENSE
+# FIXME! for now just return the default licence
 
-sub _module_license { return $DEFAULT_LICENSE; }
+sub _module_license
+{
+    my $self = shift;
+
+    return $self->_get_default_license();
+}
+
+sub _get_default_license
+{ 
+    return 'CHECK(GPL+ or Artistic)';
+}
 
 #
 # my $description = _module_description($module);
