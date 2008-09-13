@@ -1,6 +1,6 @@
 ---
 name: CPANPLUS-Dist-Fedora
-version: 0.0.2
+version: 0.0.3
 author:
   - 'Shlomi Fish <shlomif@cpan.org>'
 abstract: a cpanplus backend to build Fedora/RedHat rpms
@@ -13,12 +13,10 @@ requires:
   CPANPLUS::Error: 0
   File::Basename: 0
   File::Copy: 0
-  File::Slurp: 0
   IPC::Cmd: 0
   POSIX: 0
   Pod::POM: 0
   Pod::POM::View::Text: 0
-  Readonly: 0
   Template: 0
   Text::Wrap: 0
   perl: 5.008
@@ -31,7 +29,7 @@ recommends:
 provides:
   CPANPLUS::Dist::Fedora:
     file: lib/CPANPLUS/Dist/Fedora.pm
-    version: 0.0.2
+    version: 0.0.3
 generated_by: Module::Build version 0.2808
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.2.html

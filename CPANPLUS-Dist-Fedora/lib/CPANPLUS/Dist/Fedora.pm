@@ -25,7 +25,7 @@ use POSIX qw[ strftime ];
 use Text::Wrap;
 use Template;
 
-our $VERSION = '0.0.2';
+our $VERSION = '0.0.3';
 
 sub _get_spec_template
 {

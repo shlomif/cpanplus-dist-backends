@@ -2,6 +2,7 @@ Revision history for CPANPLUS-Dist-Fedora
 
 ( CPANPLUS-Dist-Mdv changes below. )
 
+0.0.3 Sat Sep 13 10:20:48 IDT 2008
  - Changed the Readonly variables that contained command-line 
  invocations of "rpm" (that got invoked when loading the module) to a
  memoized method that gets called at run time.
@@ -12,7 +13,7 @@ Revision history for CPANPLUS-Dist-Fedora
  - Eliminated the use of File::Slurp and made the file slurp a line-wise loop,
  that should consume less memory.
  
-0.0.2 TODO: FILL IN.
+0.0.2 Fri Sep 12 20:00:00 IDT 2008
  - Applied a modified version of Chris Weyl's patch to 
  lib/CPANPLUS/Dist/Fedora.pm :
     - generate the spec using Template Toolkit.
