@@ -193,9 +193,9 @@ sub prepare {
     $status->distvers($module->package_version);
     $status->summary(_module_summary($module));
     $status->description(_module_description($module));
-    $status->license(_module_license($module));
+    $status->license($self->_module_license($module));
     #$status->disttop($module->name=~ /([^:]+)::/);
-    my $dir = $status->rpmdir($self->_current_dir());
+    my $dir = $status->rpmdir($self->_get_current_dir());
     $status->rpmvers(1);
 
     # Cache files
@@ -444,6 +444,7 @@ sub _mk_pkg_name {
 sub _module_license
 {
     my $self = shift;
+    my $module = shift;
 
     return $self->_get_default_license();
 }
@@ -493,8 +494,8 @@ sub _module_description {
 #
 # my $summary = _module_summary($module);
 #
-# given a cpanplus::module, return its registered description (if any)
-# or try to extract it from the embedded pod in the extracted files.
+# Given a CPANPLUS::Module, return its registered description (if any)
+# or try to extract it from the embedded POD in the extracted files.
 #
 sub _module_summary {
     my ($module) = @_;
