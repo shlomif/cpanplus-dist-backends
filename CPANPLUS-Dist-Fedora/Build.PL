@@ -31,7 +31,6 @@ my $builder = Module::Build->new (
         'CPANPLUS::Error'      => 0,
         'File::Basename'       => 0,
         'File::Copy'           => 0,
-        'File::Slurp'          => 0,
         'IPC::Cmd'             => 0,
         'Pod::POM'             => 0,
         'Pod::POM::View::Text' => 0,

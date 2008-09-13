@@ -17,7 +17,6 @@ use Cwd;
 use CPANPLUS::Error; # imported subs: error(), msg()
 use File::Basename;
 use File::Copy      qw[ copy ];
-use File::Slurp     qw[ slurp ];
 use IPC::Cmd        qw[ run can_run ];
 use List::Util      qw[ first ];
 use Pod::POM;
@@ -404,8 +403,24 @@ sub _has_been_built {
 sub _is_module_build_compat {
     my ($module) = @_;
     my $makefile = $module->_status->extract . '/Makefile.PL';
-    my $content  = slurp($makefile);
-    return $content =~ /Module::Build::Compat/;
+
+    open my $mk_fh, "<", $makefile;
+
+    my $found = 0;
+
+    LINES:
+    while (my $line = <$mk_fh>)
+    {
+        if ($line =~ /Module::Build::Compat/)
+        {
+            $found = 1;
+            last LINES;
+        }
+    }
+
+    close($mk_fh);
+
+    return $found;
 }
 
 
