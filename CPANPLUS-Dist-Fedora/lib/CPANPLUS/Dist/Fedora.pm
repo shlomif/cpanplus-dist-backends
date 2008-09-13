@@ -23,16 +23,16 @@ use List::Util      qw[ first ];
 use Pod::POM;
 use Pod::POM::View::Text;
 use POSIX qw[ strftime ];
-use Readonly;
 use Text::Wrap;
 use Template;
 
 our $VERSION = '0.0.2';
 
-Readonly my $DIR => cwd;
-
-# Dealing with DATA gets increasingly messy, IMHO
-Readonly my $SPEC_TEMPLATE => <<'END_SPEC';
+sub _get_spec_template
+{
+    # Dealing with DATA gets increasingly messy, IMHO
+    # So we're going to use the Template Toolkit instead
+    return <<'END_SPEC';
 
 Name:       [% status.rpmname %] 
 Version:    [% status.distvers %] 
@@ -101,6 +101,7 @@ rm -rf %{buildroot}
 - initial Fedora packaging
 - generated with cpan2dist (CPANPLUS::Dist::Fedora version [% packagervers %])
 END_SPEC
+}
 
 #--
 # class methods
@@ -161,6 +162,9 @@ sub init {
           ]
     );
 
+    # This is done to initialise it.
+    $self->_get_current_dir();
+
     return 1;
 }
 
@@ -192,7 +196,7 @@ sub prepare {
     $status->description(_module_description($module));
     $status->license(_module_license($module));
     #$status->disttop($module->name=~ /([^:]+)::/);
-    my $dir = $status->rpmdir($DIR);
+    my $dir = $status->rpmdir($self->_current_dir());
     $status->rpmvers(1);
 
     # Cache files
@@ -244,10 +248,12 @@ sub prepare {
 
     # Prepare our template
     my $tmpl = Template->new({ EVAL_PERL => 1 });
+
+    my $spec_template = $self->_get_spec_template();
     
     # Process template into spec
     $tmpl->process(
-        \$SPEC_TEMPLATE, 
+        \$spec_template, 
         {
             status    => $status,
             module    => $module,
@@ -535,6 +541,20 @@ sub _get_packager
 
     return $self->{_packager};
 }
+
+sub _get_current_dir
+{
+    my $self = shift;
+
+    # Memoize it.
+    if (!defined($self->{_current_dir}))
+    {
+        $self->{_current_dir} = cwd();
+    }
+
+    return $self->{_current_dir};
+}
+
 1;
 
 __END__

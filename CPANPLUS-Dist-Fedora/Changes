@@ -7,6 +7,8 @@ Revision history for CPANPLUS-Dist-Fedora
  memoized method that gets called at run time.
     - Fixes the build errors reported in:
         - http://nntp.x.perl.org/group/perl.cpan.testers/2202219
+ - Eliminated the rest of the Readonly variables and converted them to
+ object methods.
  
 0.0.2 TODO: FILL IN.
  - Applied a modified version of Chris Weyl's patch to 
