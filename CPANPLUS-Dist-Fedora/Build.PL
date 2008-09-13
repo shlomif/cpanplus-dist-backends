@@ -36,7 +36,6 @@ my $builder = Module::Build->new (
         'Pod::POM'             => 0,
         'Pod::POM::View::Text' => 0,
         'POSIX'                => 0,
-        'Readonly'             => 0,
         'Text::Wrap'           => 0,
         'Template'             => 0,
         'perl'                 => '5.008',
