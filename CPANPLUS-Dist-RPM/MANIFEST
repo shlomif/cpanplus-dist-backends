@@ -8,6 +8,6 @@ MANIFEST
 META.yml
 README
 t/00.load.t
+t/pod-coverage.t
+t/pod.t
 xt/release/perlcritic.t
-xt/release/pod-coverage.t
-xt/release/pod.t
