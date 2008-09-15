@@ -12,14 +12,13 @@ use warnings;
 
 use base 'CPANPLUS::Dist::RPM';
 
-use SUPER;
-
 our $VERSION = '0.1.1';
 
 # check to see if we're on a fedora system; if not, return false, if so, then
 # pass off to our ancestor method for its checks.
 
 sub format_available {
+    my $self = shift;
 
     # Check Fedora release file
     if ( ! -f '/etc/fedora-release' ) {
@@ -27,7 +26,7 @@ sub format_available {
         return 0;
     }
     
-    return super;
+    return $self->SUPER::format_available(@_);
 }
 
 # my $bool = $self->_has_been_built;
@@ -35,16 +34,16 @@ sub format_available {
 # Returns true if there's already a package built for this module.
 # 
 sub _has_been_built {
-    my ($self, $name, $vers) = @_;
+    my $self = shift;
+    my ($name, $vers) = @_;
 
     # FIXME this entire method should be overridden to first check the local
     # rpmdb, then check the yum repos via repoquery.  As is we're pretty
     # broken right now
     #
     # For now, just call super
-    return super;
+    return $self->SUPER::_has_been_built(@_);
 }
-
 
 1;
 
