@@ -14,26 +14,91 @@ use base 'CPANPLUS::Dist::Base';
 
 use Cwd;
 use CPANPLUS::Error; # imported subs: error(), msg()
-use Data::Section -setup;
 use File::Basename;
 use File::Copy      qw[ copy ];
-use File::Slurp     qw[ slurp ];
 use IPC::Cmd        qw[ run can_run ];
 use List::Util      qw[ first ];
 use Pod::POM;
 use Pod::POM::View::Text;
 use POSIX qw[ strftime ];
-use Readonly;
 use Text::Wrap;
 use Template;
 
 our $VERSION = '0.0.2';
 
-Readonly my $RPMDIR => do { chomp(my $d=qx[ rpm --eval %_topdir ]); $d; };
-Readonly my $PACKAGER => 
-    do { my $d = `rpm --eval '%{packager}'`; chomp $d; $d };
-Readonly my $DEFAULT_LICENSE => 'CHECK(GPL+ or Artistic)';
-Readonly my $DIR => cwd;
+sub _get_spec_template
+{
+     # Dealing with DATA gets increasingly messy, IMHO
+     # So we're going to use the Template Toolkit instead
+     return <<'END_SPEC';
+Name:       [% status.rpmname %] 
+Version:    [% status.distvers %] 
+Release:    [% status.rpmvers %]%{?dist}
+License:    [% status.license %] 
+Group:      Development/Libraries
+Summary:    [% status.summary %] 
+Source:     http://search.cpan.org/CPAN/[% module.path %]/[% status.distname %]-%{version}.[% module.package_extension %] 
+Url:        http://search.cpan.org/dist/[% status.distname %]
+BuildRoot:  %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n) 
+Requires:  perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
+[% IF status.is_noarch %]BuildArch:  noarch[% END -%]
+
+BuildRequires: perl(ExtUtils::MakeMaker) 
+[% brs = buildreqs; FOREACH br = brs.keys.sort -%]
+BuildRequires: perl([% br %])[% IF (brs.$br != 0) %] >= [% brs.$br %][% END %]
+[% END -%]
+
+
+%description
+[% status.description -%]
+
+
+%prep
+%setup -q -n [% status.distname %]-%{version}
+
+%build
+[% IF (!status.is_noarch) -%]
+%{__perl} Makefile.PL INSTALLDIRS=vendor OPTIMIZE="%{optflags}"
+[% ELSE -%]
+%{__perl} Makefile.PL INSTALLDIRS=vendor
+[% END -%]
+make %{?_smp_mflags}
+
+%install
+rm -rf %{buildroot}
+
+make pure_install PERL_INSTALL_ROOT=%{buildroot}
+find %{buildroot} -type f -name .packlist -exec rm -f {} ';'
+[% IF (!status.is_noarch) -%]
+find %{buildroot} -type f -name '*.bs' -a -size 0 -exec rm -f {} ';'
+[% END -%]
+find %{buildroot} -depth -type d -exec rmdir {} 2>/dev/null ';'
+
+%{_fixperms} %{buildroot}/*
+
+%check
+make test
+
+%clean
+rm -rf %{buildroot} 
+
+%files
+%defattr(-,root,root,-)
+%doc [% docfiles %] 
+[% IF (status.is_noarch) -%]
+%{perl_vendorlib}/*
+[% ELSE -%]
+%{perl_vendorarch}/*
+%exclude %dir %{perl_vendorarch}/auto
+[% END -%]
+%{_mandir}/man3/*.3*
+
+%changelog
+* [% date %] [% packager %] [% status.distvers %]-[% status.rpmvers %]
+- initial RPM packaging
+- generated with cpan2dist (CPANPLUS::Dist::RPM version [% packagervers %])
+END_SPEC
+}
 
 #--
 # class methods
@@ -89,6 +154,9 @@ sub init {
           ]
     );
 
+    # This is done to initialise it.
+    $self->_get_current_dir();
+
     return 1;
 }
 
@@ -121,7 +189,7 @@ sub prepare {
     $status->description($self->_module_description($module));
     $status->license($self->_module_license($module));
     #$status->disttop($module->name=~ /([^:]+)::/);
-    my $dir = $status->rpmdir($DIR);
+    my $dir = $status->rpmdir($self->_get_current_dir());
     $status->rpmvers(1);
 
     # Cache files
@@ -173,16 +241,18 @@ sub prepare {
 
     # Prepare our template
     my $tmpl = Template->new({ EVAL_PERL => 1 });
+
+    my $spec_template = $self->_get_spec_template();
     
     # Process template into spec
     $tmpl->process(
-        $self->section_data('spec'),
+        \$spec_template,
         {
             status    => $status,
             module    => $module,
             buildreqs => $buildreqs,
             date      => strftime("%a %b %d %Y", localtime),
-            packager  => $PACKAGER,
+            packager  => $self->_get_packager(),
             docfiles  => join(' ', @docfiles),
 
             packagervers => $VERSION,
@@ -314,6 +384,7 @@ sub install {
 # 
 sub _has_been_built {
     my ($self, $name, $vers) = @_;
+    my $RPMDIR = $self->_get_RPMDIR();
     my $pkg = ( sort glob "$RPMDIR/RPMS/*/$name-$vers-*.rpm" )[-1];
     return $pkg;
     # FIXME: should we check cooker?
@@ -323,8 +394,24 @@ sub _has_been_built {
 sub _is_module_build_compat {
     my ($self, $module) = @_;
     my $makefile = $module->_status->extract . '/Makefile.PL';
-    my $content  = slurp($makefile);
-    return $content =~ /Module::Build::Compat/;
+
+    open my $mk_fh, "<", $makefile;
+
+    my $found = 0;
+
+    LINES:
+    while (my $line = <$mk_fh>)
+    {
+        if ($line =~ /Module::Build::Compat/)
+        {
+            $found = 1;
+            last LINES;
+        }
+    }
+
+    close($mk_fh);
+
+    return $found;
 }
 
 
@@ -343,9 +430,20 @@ sub _mk_pkg_name {
 
 # determine the module license. 
 #
-# FIXME! for now just return $DEFAULT_LICENSE
+# FIXME! for now just return the default licence
 
-sub _module_license { return $DEFAULT_LICENSE; }
+sub _module_license
+{
+    my $self = shift;
+    my $module = shift;
+
+    return $self->_get_default_license();
+}
+
+sub _get_default_license
+{ 
+    return 'CHECK(GPL+ or Artistic)';
+}
 
 #
 # my $description = _module_description($module);
@@ -387,8 +485,8 @@ sub _module_description {
 #
 # my $summary = _module_summary($module);
 #
-# given a cpanplus::module, return its registered description (if any)
-# or try to extract it from the embedded pod in the extracted files.
+# Given a CPANPLUS::Module, return its registered description (if any)
+# or try to extract it from the embedded POD in the extracted files.
 #
 sub _module_summary {
     my ($self, $module) = @_;
@@ -422,79 +520,49 @@ sub _module_summary {
     return 'no summary found';
 }
 
+sub _get_RPMDIR
+{
+    my $self = shift;
+
+    # Memoize it.
+    if (!defined($self->{_RPMDIR}))
+    {
+        chomp(my $d=qx[ rpm --eval %_topdir ]);
+        $self->{_RPMDIR} = $d;
+    }
+
+    return $self->{_RPMDIR};
+}
+
+sub _get_packager
+{
+    my $self = shift;
+
+    # Memoize it.
+    if (!defined($self->{_packager}))
+    {
+        my $d = `rpm --eval '%{packager}'`; 
+        chomp $d;
+        $self->{_packager} = $d;
+    }
+
+    return $self->{_packager};
+}
+
+sub _get_current_dir
+{
+    my $self = shift;
+
+    # Memoize it.
+    if (!defined($self->{_current_dir}))
+    {
+        $self->{_current_dir} = cwd();
+    }
+
+    return $self->{_current_dir};
+}
+
 1;
-
-__DATA__
-__[ spec ]__
-
-Name:       [% status.rpmname %] 
-Version:    [% status.distvers %] 
-Release:    [% status.rpmvers %]%{?dist}
-License:    [% status.license %] 
-Group:      Development/Libraries
-Summary:    [% status.summary %] 
-Source:     http://search.cpan.org/CPAN/[% module.path %]/[% status.distname %]-%{version}.[% module.package_extension %] 
-Url:        http://search.cpan.org/dist/[% status.distname %]
-BuildRoot:  %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n) 
-Requires:  perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
-[% IF status.is_noarch %]BuildArch:  noarch[% END -%]
-
-BuildRequires: perl(ExtUtils::MakeMaker) 
-[% brs = buildreqs; FOREACH br = brs.keys.sort -%]
-BuildRequires: perl([% br %])[% IF (brs.$br != 0) %] >= [% brs.$br %][% END %]
-[% END -%]
-
-
-%description
-[% status.description -%]
-
-
-%prep
-%setup -q -n [% status.distname %]-%{version}
-
-%build
-[% IF (!status.is_noarch) -%]
-%{__perl} Makefile.PL INSTALLDIRS=vendor OPTIMIZE="%{optflags}"
-[% ELSE -%]
-%{__perl} Makefile.PL INSTALLDIRS=vendor
-[% END -%]
-make %{?_smp_mflags}
-
-%install
-rm -rf %{buildroot}
-
-make pure_install PERL_INSTALL_ROOT=%{buildroot}
-find %{buildroot} -type f -name .packlist -exec rm -f {} ';'
-[% IF (!status.is_noarch) -%]
-find %{buildroot} -type f -name '*.bs' -a -size 0 -exec rm -f {} ';'
-[% END -%]
-find %{buildroot} -depth -type d -exec rmdir {} 2>/dev/null ';'
-
-%{_fixperms} %{buildroot}/*
-
-%check
-make test
-
-%clean
-rm -rf %{buildroot} 
-
-%files
-%defattr(-,root,root,-)
-%doc [% docfiles %] 
-[% IF (status.is_noarch) -%]
-%{perl_vendorlib}/*
-[% ELSE -%]
-%{perl_vendorarch}/*
-%exclude %dir %{perl_vendorarch}/auto
-[% END -%]
-%{_mandir}/man3/*.3*
-
-%changelog
-* [% date %] [% packager %] [% status.distvers %]-[% status.rpmvers %]
-- initial RPM packaging
-- generated with cpan2dist (CPANPLUS::Dist::RPM version [% packagervers %])
-
-__[ pod ]__
 
 =head1 NAME
 

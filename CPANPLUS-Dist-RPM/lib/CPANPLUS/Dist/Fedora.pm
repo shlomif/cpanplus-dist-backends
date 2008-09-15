@@ -45,11 +45,9 @@ sub _has_been_built {
     return $self->SUPER::_has_been_built(@_);
 }
 
-1;
-
-__DATA__
-__[ spec ]__
-
+sub _get_spec_template
+{
+    return <<'END_SPEC';
 Name:       [% status.rpmname %] 
 Version:    [% status.distvers %] 
 Release:    [% status.rpmvers %]%{?dist}
@@ -116,10 +114,10 @@ rm -rf %{buildroot}
 * [% date %] [% packager %] [% status.distvers %]-[% status.rpmvers %]
 - initial Fedora packaging
 - generated with cpan2dist (CPANPLUS::Dist::Fedora version [% packagervers %])
+END_SPEC
+}
 
-__[ pod ]__
-
-__END__
+1;
 
 =head1 NAME
 

@@ -1,39 +1,39 @@
 ---
-abstract: 'a cpanplus backend to build RPM/RedHat rpms'
+name: CPANPLUS-Dist-RPM
+version: 0.0.2
 author:
   - 'Chris Weyl <cweyl@alumni.drew.edu>'
-build_requires:
-  Test::More: 0
-  Test::use::ok: 0
-distribution_type: module
-generated_by: 'Module::Install version 0.77'
+abstract: a cpanplus backend to build RPM/RedHat rpms
 license: perl
-meta-spec:
-  url: http://module-build.sourceforge.net/META-spec-v1.4.html
-  version: 1.4
-name: CPANPLUS-Dist-RPM
-no_index:
-  directory:
-    - inc
-    - t
-  package:
-    - CPANPLUS::Dist::Fedora
+resources:
+  license: http://dev.perl.org/licenses/
 requires:
+  CPANPLUS: 0
   CPANPLUS::Dist::Base: 0
   CPANPLUS::Error: 0
   Cwd: 0
-  Data::Section: 0
   File::Basename: 0
   File::Copy: 0
-  File::Slurp: 0
   IPC::Cmd: 0
-  List::Util: 0
   POSIX: 0
   Pod::POM: 0
   Pod::POM::View::Text: 0
-  Readonly: 0
   Template: 0
   Text::Wrap: 0
-resources:
-  license: http://dev.perl.org/licenses/
-version: 0.0.2
+  perl: 5.008
+build_requires:
+  Test::More: 0
+recommends:
+  Test::Pod: 0
+  Test::Pod::Coverage: 0
+provides:
+  CPANPLUS::Dist::Fedora:
+    file: lib/CPANPLUS/Dist/Fedora.pm
+    version: 0.1.1
+  CPANPLUS::Dist::RPM:
+    file: lib/CPANPLUS/Dist/RPM.pm
+    version: 0.0.2
+generated_by: Module::Build version 0.2808
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.2.html
+  version: 1.2
