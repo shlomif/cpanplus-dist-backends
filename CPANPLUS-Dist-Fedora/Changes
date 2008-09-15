@@ -2,6 +2,8 @@ Revision history for CPANPLUS-Dist-Fedora
 
 ( CPANPLUS-Dist-Mdv changes below. )
 
+ - Removed a duplicate "perl" dependency from Build.PL.
+
 0.0.3 Sat Sep 13 10:20:48 IDT 2008
  - Changed the Readonly variables that contained command-line 
  invocations of "rpm" (that got invoked when loading the module) to a

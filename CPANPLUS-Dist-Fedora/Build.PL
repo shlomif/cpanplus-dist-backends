@@ -23,7 +23,6 @@ my $builder = Module::Build->new (
     script_files   => [ ],
     build_requires => {
         'Test::More'           => 0,
-        'perl'                 => '5.008',
     },
     requires       => {
         'CPANPLUS'             => 0,
