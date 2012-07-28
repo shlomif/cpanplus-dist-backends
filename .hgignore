@@ -1,0 +1,9 @@
+syntax:glob
+CPANPLUS-Dist-RPM/blib
+CPANPLUS-Dist-RPM/_build
+CPANPLUS-Dist-RPM/Build
+CPANPLUS-Dist-RPM/Makefile.PL
+CPANPLUS-Dist-Fedora/blib
+CPANPLUS-Dist-Fedora/_build
+CPANPLUS-Dist-Fedora/Build
+CPANPLUS-Dist-Fedora/Makefile.PL
