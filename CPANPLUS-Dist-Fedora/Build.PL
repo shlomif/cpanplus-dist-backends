@@ -24,6 +24,9 @@ my $builder = Test::Run::Builder->new (
         'CPANPLUS-Dist-Fedora-*', 'MANIFEST.bak',
         map { ( '*/' x $_ ) . '*~' } 0..5 ],
     script_files   => [ ],
+    configure_requires => {
+        'Module::Build' => '0.36',
+    },
     build_requires => {
         'Test::More'           => 0,
     },
