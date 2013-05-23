@@ -3,6 +3,8 @@ Revision history for CPANPLUS-Dist-Fedora
 ( CPANPLUS-Dist-Mdv changes below. )
 
  - Removed a duplicate "perl" dependency from Build.PL.
+ - Remove trailing whitespace.
+ - Add Test::Run::Builder support.
 
 0.0.3   2008-09-13
  - Changed the Readonly variables that contained command-line
