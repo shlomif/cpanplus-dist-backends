@@ -10,9 +10,12 @@
 
 use strict;
 use warnings;
-use Module::Build;
 
-my $builder = Module::Build->new (
+use lib './inc';
+
+use Test::Run::Builder;
+
+my $builder = Test::Run::Builder->new (
     module_name         => 'CPANPLUS::Dist::Fedora',
     dist_author         => 'Shlomi Fish <shlomif@cpan.org>',
     license             => 'perl',

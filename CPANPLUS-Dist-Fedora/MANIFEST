@@ -1,5 +1,6 @@
 Build.PL
 Changes
+inc/Test/Run/Builder.pm
 lib/CPANPLUS/Dist/Fedora.pm
 LICENSE
 Makefile.PL
@@ -9,3 +10,4 @@ README
 t/00-load.t
 t/01-pod.t
 t/02-pod-coverage.t
+META.json

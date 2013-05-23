@@ -1,12 +1,25 @@
 ---
-name: CPANPLUS-Dist-Fedora
-version: 0.0.3
+abstract: 'a cpanplus backend to build Fedora/RedHat rpms'
 author:
   - 'Shlomi Fish <shlomif@cpan.org>'
-abstract: a cpanplus backend to build Fedora/RedHat rpms
+build_requires:
+  Test::More: 0
+configure_requires:
+  Module::Build: 0.40
+dynamic_config: 1
+generated_by: 'Module::Build version 0.4005, CPAN::Meta::Converter version 2.120921'
 license: perl
-resources:
-  license: http://dev.perl.org/licenses/
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+name: CPANPLUS-Dist-Fedora
+provides:
+  CPANPLUS::Dist::Fedora:
+    file: lib/CPANPLUS/Dist/Fedora.pm
+    version: v0.0.3
+recommends:
+  Test::Pod: 0
+  Test::Pod::Coverage: 0
 requires:
   CPANPLUS: 0
   CPANPLUS::Dist::Base: 0
@@ -20,16 +33,6 @@ requires:
   Template: 0
   Text::Wrap: 0
   perl: 5.008
-build_requires:
-  Test::More: 0
-recommends:
-  Test::Pod: 0
-  Test::Pod::Coverage: 0
-provides:
-  CPANPLUS::Dist::Fedora:
-    file: lib/CPANPLUS/Dist/Fedora.pm
-    version: 0.0.3
-generated_by: Module::Build version 0.2808
-meta-spec:
-  url: http://module-build.sourceforge.net/META-spec-v1.2.html
-  version: 1.2
+resources:
+  license: http://dev.perl.org/licenses/
+version: v0.0.3
