@@ -2,6 +2,14 @@ Revision history for CPANPLUS-Dist-Fedora
 
 ( CPANPLUS-Dist-Mdv changes below. )
 
+0.0.5   2014-02-18
+ - .spec file fix for Fedora and paths.
+    - https://rt.cpan.org/Ticket/Display.html?id=93118
+    - Thanks to Chris Travers for the report and fix.
+ - Adding prerequisites to requires and buildrequires.
+    - https://rt.cpan.org/Ticket/Display.html?id=93121
+    - Thanks to Chris Travers for the report and fix.
+
 0.0.4   2013-05-23
  - Removed a duplicate "perl" dependency from Build.PL.
  - Remove trailing whitespace.

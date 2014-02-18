@@ -3,36 +3,36 @@ abstract: 'a cpanplus backend to build Fedora/RedHat rpms'
 author:
   - 'Shlomi Fish <shlomif@cpan.org>'
 build_requires:
-  Test::More: 0
+  Test::More: '0'
 configure_requires:
-  Module::Build: 0.36
+  Module::Build: '0.36'
 dynamic_config: 1
-generated_by: 'Module::Build version 0.4005, CPAN::Meta::Converter version 2.120921'
+generated_by: 'Module::Build version 0.4205, CPAN::Meta::Converter version 2.133380'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
-  version: 1.4
+  version: '1.4'
 name: CPANPLUS-Dist-Fedora
 provides:
   CPANPLUS::Dist::Fedora:
     file: lib/CPANPLUS/Dist/Fedora.pm
-    version: v0.0.3
+    version: v0.0.4
 recommends:
-  Test::Pod: 0
-  Test::Pod::Coverage: 0
+  Test::Pod: '0'
+  Test::Pod::Coverage: '0'
 requires:
-  CPANPLUS: 0
-  CPANPLUS::Dist::Base: 0
-  CPANPLUS::Error: 0
-  File::Basename: 0
-  File::Copy: 0
-  IPC::Cmd: 0
-  POSIX: 0
-  Pod::POM: 0
-  Pod::POM::View::Text: 0
-  Template: 0
-  Text::Wrap: 0
-  perl: 5.008
+  CPANPLUS: '0'
+  CPANPLUS::Dist::Base: '0'
+  CPANPLUS::Error: '0'
+  File::Basename: '0'
+  File::Copy: '0'
+  IPC::Cmd: '0'
+  POSIX: '0'
+  Pod::POM: '0'
+  Pod::POM::View::Text: '0'
+  Template: '0'
+  Text::Wrap: '0'
+  perl: '5.008'
 resources:
   license: http://dev.perl.org/licenses/
-version: v0.0.3
+version: v0.0.4
