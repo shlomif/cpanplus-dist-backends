@@ -9,6 +9,7 @@ Revision history for CPANPLUS-Dist-Fedora
  - Adding prerequisites to requires and buildrequires.
     - https://rt.cpan.org/Ticket/Display.html?id=93121
     - Thanks to Chris Travers for the report and fix.
+ - META.yml: add VCS repository URL + keywords.
 
 0.0.4   2013-05-23
  - Removed a duplicate "perl" dependency from Build.PL.

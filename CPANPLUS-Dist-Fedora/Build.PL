@@ -49,6 +49,26 @@ my $builder = Test::Run::Builder->new (
         'Test::Pod::Coverage' => 0,
     },
     create_makefile_pl => "traditional",
+    meta_merge =>
+    {
+        resources =>
+        {
+            repository => "https://bitbucket.org/shlomif/cpanplus-dist-backends",
+        },
+        keywords =>
+        [
+            qw(
+            RHEL
+            centos
+            cpan
+            cpanplus
+            fedora
+            perl
+            rhel
+            rpm
+            ),
+        ],
+    },
 );
 
 $builder->create_build_script();
