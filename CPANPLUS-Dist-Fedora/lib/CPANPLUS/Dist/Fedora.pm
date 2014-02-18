@@ -43,10 +43,12 @@ Source:     http://search.cpan.org/CPAN/[% module.path %]/[% status.distname %]-
 Url:        http://search.cpan.org/dist/[% status.distname %]
 BuildRoot:  %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires:  perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
-[% IF status.is_noarch %]BuildArch:  noarch[% END -%]
-
-BuildRequires: perl(ExtUtils::MakeMaker)
+[% IF status.is_noarch %]BuildArch:  noarch[% END %]
 [% brs = buildreqs; FOREACH br = brs.keys.sort -%]
+Requires: perl([% br %])[% IF (brs.$br != 0) %] >= [% brs.$br %][% END %]
+[% END -%]
+BuildRequires: perl(ExtUtils::MakeMaker)
+[% FOREACH br = brs.keys.sort -%]
 BuildRequires: perl([% br %])[% IF (brs.$br != 0) %] >= [% brs.$br %][% END %]
 [% END -%]
 
