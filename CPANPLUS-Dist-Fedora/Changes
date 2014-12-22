@@ -5,6 +5,9 @@ Revision history for CPANPLUS-Dist-Fedora
 0.0.6   2014-12-22
  - Update the README, as it was still the one for CPANPLUS-Dist-Mdv.
     - Thanks to Tom Legrady for the report.
+ - Probing for '/etc/redhat-release' as well as '/etc/fedora-release'
+    - So one can use CPANPLUS::Dist::Fedora on CentOS/RHEL/etc.
+    - Thanks to Tom Legrady for the report.
 
 0.0.5   2014-02-18
  - .spec file fix for Fedora and paths.

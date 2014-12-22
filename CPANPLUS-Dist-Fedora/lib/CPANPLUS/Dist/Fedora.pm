@@ -115,7 +115,7 @@ END_SPEC
 #
 sub format_available {
     # Check Fedora release file
-    if ( ! -f '/etc/fedora-release' ) {
+    if ( not ( -f '/etc/fedora-release' or -f '/etc/redhat-release') ) {
         error( 'Not on a Fedora system' );
         return;
     }
