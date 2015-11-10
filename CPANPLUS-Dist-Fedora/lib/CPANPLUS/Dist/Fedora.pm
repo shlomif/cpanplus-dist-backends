@@ -45,11 +45,11 @@ BuildRoot:  %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires:  perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
 [% IF status.is_noarch %]BuildArch:  noarch[% END %]
 [% brs = buildreqs; FOREACH br = brs.keys.sort -%]
-Requires: perl([% br %])[% IF (brs.$br != 0) %] >= [% brs.$br %][% END %]
+Requires: [% rpm_req(br) %][% IF (brs.$br != 0) %] >= [% brs.$br %][% END %]
 [% END -%]
 BuildRequires: perl(ExtUtils::MakeMaker)
 [% FOREACH br = brs.keys.sort -%]
-BuildRequires: perl([% br %])[% IF (brs.$br != 0) %] >= [% brs.$br %][% END %]
+BuildRequires: [% rpm_req(br) %][% IF (brs.$br != 0) %] >= [% brs.$br %][% END %]
 [% END -%]
 
 
@@ -262,6 +262,10 @@ sub prepare {
             date      => strftime("%a %b %d %Y", localtime),
             packager  => $self->_get_packager(),
             docfiles  => join(' ', @docfiles),
+            rpm_req => sub {
+                my $br = shift;
+                return (($br eq 'perl') ? $br : "perl($br)");
+            },
 
             packagervers => $VERSION,
             # s/DISTEXTRA/join( "\n", @{ $status->extra_files || [] })/e;
