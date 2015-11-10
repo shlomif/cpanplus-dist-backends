@@ -2,7 +2,7 @@ Revision history for CPANPLUS-Dist-Fedora
 
 ( CPANPLUS-Dist-Mdv changes below. )
 
-0.0.7   Unknown
+0.0.7   2015-11-10
  - Fix RT#108673 - "Requires: perl(perl)" should be "Requires: perl".
     - Thanks to Joseph Konczal for the report and for a proposed patch
     which ended up being done differently.
