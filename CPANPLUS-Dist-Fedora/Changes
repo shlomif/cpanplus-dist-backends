@@ -6,6 +6,7 @@ Revision history for CPANPLUS-Dist-Fedora
  - Fix RT#108673 - "Requires: perl(perl)" should be "Requires: perl".
     - Thanks to Joseph Konczal for the report and for a proposed patch
     which ended up being done differently.
+ - Change the Url in the generated .spec to be a metacpan.org URL.
 
 0.0.6   2014-12-22
  - Update the README, as it was still the one for CPANPLUS-Dist-Mdv.

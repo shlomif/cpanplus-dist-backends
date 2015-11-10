@@ -40,7 +40,7 @@ License:    [% status.license %]
 Group:      Development/Libraries
 Summary:    [% status.summary %]
 Source:     http://search.cpan.org/CPAN/[% module.path %]/[% status.distname %]-%{version}.[% module.package_extension %]
-Url:        http://search.cpan.org/dist/[% status.distname %]
+Url:        http://metacpan.org/release/[% status.distname %]
 BuildRoot:  %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires:  perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
 [% IF status.is_noarch %]BuildArch:  noarch[% END %]
