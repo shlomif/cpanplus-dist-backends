@@ -1,4 +1,3 @@
-#!perl
 #
 # This file is part of CPANPLUS::Dist::Fedora.
 # Copyright (c) 2007 Jerome Quelin, all rights reserved.
@@ -27,7 +26,7 @@ my $builder = Test::Run::Builder->new (
     configure_requires => {
         'Module::Build' => '0.36',
     },
-    build_requires => {
+    test_requires => {
         'Test::More'           => 0,
     },
     requires       => {
@@ -47,8 +46,8 @@ my $builder = Test::Run::Builder->new (
     recommends     => {
         'Test::Pod'           => 0,
         'Test::Pod::Coverage' => 0,
+        'Test::TrailingSpace' => 0,
     },
-    create_makefile_pl => "traditional",
     meta_merge =>
     {
         resources =>

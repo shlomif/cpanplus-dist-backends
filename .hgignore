@@ -6,7 +6,6 @@ CPANPLUS-Dist-RPM/Makefile.PL
 CPANPLUS-Dist-Fedora/blib
 CPANPLUS-Dist-Fedora/_build
 CPANPLUS-Dist-Fedora/Build
-CPANPLUS-Dist-Fedora/Makefile.PL
 CPANPLUS-Dist-Fedora/META.json
 CPANPLUS-Dist-Fedora/META.yml
 CPANPLUS-Dist-Fedora/MYMETA.json
