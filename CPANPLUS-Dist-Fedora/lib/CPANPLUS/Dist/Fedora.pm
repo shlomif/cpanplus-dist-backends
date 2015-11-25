@@ -274,6 +274,14 @@ sub prepare {
         $status->specpath,
     );
 
+    if ( $intern->_callbacks->munge_dist_metafile ) {
+        print 'munging...';
+
+        my $orig_contents = _read_file( $status->specpath );
+        my $new_contents = $intern->_callbacks->munge_dist_metafile->($intern, $orig_contents);
+        _write_file( $status->specpath, $new_contents );
+    }
+
     # copy package.
     my $tarball = "$dir/" . basename $module->status->fetch;
     copy $module->status->fetch, $tarball;
@@ -388,6 +396,25 @@ sub install {
 
 #--
 # Private methods:
+
+sub _read_file {
+    my ($filename) = @_;
+    open my $fh, '< :encoding(utf8)', $filename;
+    local $/;
+    my $contents = <$fh>;
+    close ($fh);
+
+    return $contents
+}
+
+sub _write_file {
+    my ($filename, $contents) = @_;
+    open my $fh, '> :encoding(utf8)', $filename;
+    print {$fh} $contents;
+    close ($fh);
+
+    return;
+}
 
 #
 # my $bool = $self->_has_been_built;

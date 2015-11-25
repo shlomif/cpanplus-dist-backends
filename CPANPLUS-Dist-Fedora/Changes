@@ -2,6 +2,12 @@ Revision history for CPANPLUS-Dist-Fedora
 
 ( CPANPLUS-Dist-Mdv changes below. )
 
+0.0.9   2015-11-25
+    - Make edit-metafile work for RPMs
+        - https://rt.cpan.org/Public/Bug/Display.html?id=109170
+        - Thanks to Joseph Konczal for the report and the patch, which
+        was somewhat modified.
+
 0.0.8   2015-11-12
   - Remove Makefile.PL and cleaned up Build.PL.
     - https://rt.cpan.org/Ticket/Display.html?id=108676
