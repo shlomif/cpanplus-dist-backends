@@ -31,19 +31,19 @@ sub _get_spec_template
      # Dealing with DATA gets increasingly messy, IMHO
      # So we're going to use the Template Toolkit instead
      return <<'END_SPEC';
-Name:       [% status.rpmname %] 
-Version:    [% status.distvers %] 
+Name:       [% status.rpmname %]
+Version:    [% status.distvers %]
 Release:    [% status.rpmvers %]%{?dist}
-License:    [% status.license %] 
+License:    [% status.license %]
 Group:      Development/Libraries
-Summary:    [% status.summary %] 
-Source:     http://search.cpan.org/CPAN/[% module.path %]/[% status.distname %]-%{version}.[% module.package_extension %] 
+Summary:    [% status.summary %]
+Source:     http://search.cpan.org/CPAN/[% module.path %]/[% status.distname %]-%{version}.[% module.package_extension %]
 Url:        http://search.cpan.org/dist/[% status.distname %]
-BuildRoot:  %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n) 
+BuildRoot:  %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires:  perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
 [% IF status.is_noarch %]BuildArch:  noarch[% END -%]
 
-BuildRequires: perl(ExtUtils::MakeMaker) 
+BuildRequires: perl(ExtUtils::MakeMaker)
 [% brs = buildreqs; FOREACH br = brs.keys.sort -%]
 BuildRequires: perl([% br %])[% IF (brs.$br != 0) %] >= [% brs.$br %][% END %]
 [% END -%]
@@ -80,11 +80,11 @@ find %{buildroot} -depth -type d -exec rmdir {} 2>/dev/null ';'
 make test
 
 %clean
-rm -rf %{buildroot} 
+rm -rf %{buildroot}
 
 %files
 %defattr(-,root,root,-)
-%doc [% docfiles %] 
+%doc [% docfiles %]
 [% IF (status.is_noarch) -%]
 %{perl_vendorlib}/*
 [% ELSE -%]
@@ -137,7 +137,7 @@ sub init {
     my $status = $self->status; # an Object::Accessor
     # distname: Foo-Bar
     # distvers: 1.23
-    # extra_files: qw[ /bin/foo /usr/bin/bar ] 
+    # extra_files: qw[ /bin/foo /usr/bin/bar ]
     # rpmname:     perl-Foo-Bar
     # rpmpath:     $RPMDIR/RPMS/noarch/perl-Foo-Bar-1.23-1mdv2008.0.noarch.rpm
     # rpmvers:     1
@@ -150,7 +150,7 @@ sub init {
     # description: a paragraph summary or so
     $status->mk_accessors(
         qw[ distname distvers extra_files rpmname rpmpath rpmvers rpmdir
-            srpmpath specpath is_noarch license summary description        
+            srpmpath specpath is_noarch license summary description
           ]
     );
 
@@ -243,7 +243,7 @@ sub prepare {
     my $tmpl = Template->new({ EVAL_PERL => 1 });
 
     my $spec_template = $self->_get_spec_template();
-    
+
     # Process template into spec
     $tmpl->process(
         \$spec_template,
@@ -317,7 +317,7 @@ sub create {
             local $ENV{LC_ALL} = 'C';
             $success = run(
                 #command => "rpmbuild -ba --quiet $spec",
-                command => 
+                command =>
                     'rpmbuild -ba '
                     . qq{--define '_sourcedir $dir' }
                     . qq{--define '_builddir $dir'  }
@@ -381,7 +381,7 @@ sub install {
 # my $bool = $self->_has_been_built;
 #
 # Returns true if there's already a package built for this module.
-# 
+#
 sub _has_been_built {
     my ($self, $name, $vers) = @_;
     my $RPMDIR = $self->_get_RPMDIR();
@@ -428,7 +428,7 @@ sub _mk_pkg_name {
     return $name;
 }
 
-# determine the module license. 
+# determine the module license.
 #
 # FIXME! for now just return the default licence
 
@@ -441,7 +441,7 @@ sub _module_license
 }
 
 sub _get_default_license
-{ 
+{
     return 'CHECK(GPL+ or Artistic)';
 }
 
@@ -541,7 +541,7 @@ sub _get_packager
     # Memoize it.
     if (!defined($self->{_packager}))
     {
-        my $d = `rpm --eval '%{packager}'`; 
+        my $d = `rpm --eval '%{packager}'`;
         chomp $d;
         $self->{_packager} = $d;
     }
@@ -664,7 +664,7 @@ administrative one;
 =item o Scan for proper license
 
 Right now we assume that the license of every module is C<the same
-as perl itself>. Although correct in almost all cases, it should 
+as perl itself>. Although correct in almost all cases, it should
 really be probed rather than assumed.
 
 
@@ -724,7 +724,7 @@ Originally based on CPANPLUS-Dist-Mdv by:
 
 Jerome Quelin, C<< <jquelin at cpan.org> >>
 
-Shlomi Fish ( L<http://www.shlomifish.org/> ) changed it into 
+Shlomi Fish ( L<http://www.shlomifish.org/> ) changed it into
 CPANPLUS-Dist-Fedora.
 
 Chris Weyl C<< <cweyl@alumni.drew.edu> >> changed it again to

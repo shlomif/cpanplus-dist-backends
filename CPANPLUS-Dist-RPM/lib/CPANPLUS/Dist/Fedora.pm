@@ -25,14 +25,14 @@ sub format_available {
         error( 'Not on a Fedora system' );
         return 0;
     }
-    
+
     return $self->SUPER::format_available(@_);
 }
 
 # my $bool = $self->_has_been_built;
 #
 # Returns true if there's already a package built for this module.
-# 
+#
 sub _has_been_built {
     my $self = shift;
     my ($name, $vers) = @_;
@@ -48,19 +48,19 @@ sub _has_been_built {
 sub _get_spec_template
 {
     return <<'END_SPEC';
-Name:       [% status.rpmname %] 
-Version:    [% status.distvers %] 
+Name:       [% status.rpmname %]
+Version:    [% status.distvers %]
 Release:    [% status.rpmvers %]%{?dist}
-License:    [% status.license %] 
+License:    [% status.license %]
 Group:      Development/Libraries
-Summary:    [% status.summary %] 
-Source:     http://search.cpan.org/CPAN/[% module.path %]/[% status.distname %]-%{version}.[% module.package_extension %] 
+Summary:    [% status.summary %]
+Source:     http://search.cpan.org/CPAN/[% module.path %]/[% status.distname %]-%{version}.[% module.package_extension %]
 Url:        http://search.cpan.org/dist/[% status.distname %]
-BuildRoot:  %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n) 
+BuildRoot:  %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires:  perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
 [% IF status.is_noarch %]BuildArch:  noarch[% END -%]
 
-BuildRequires: perl(ExtUtils::MakeMaker) 
+BuildRequires: perl(ExtUtils::MakeMaker)
 [% brs = buildreqs; FOREACH br = brs.keys.sort -%]
 BuildRequires: perl([% br %])[% IF (brs.$br != 0) %] >= [% brs.$br %][% END %]
 [% END -%]
@@ -97,11 +97,11 @@ find %{buildroot} -depth -type d -exec rmdir {} 2>/dev/null ';'
 make test
 
 %clean
-rm -rf %{buildroot} 
+rm -rf %{buildroot}
 
 %files
 %defattr(-,root,root,-)
-%doc [% docfiles %] 
+%doc [% docfiles %]
 [% IF (status.is_noarch) -%]
 %{perl_vendorlib}/*
 [% ELSE -%]
@@ -219,7 +219,7 @@ administrative one;
 =item o Scan for proper license
 
 Right now we assume that the license of every module is C<the same
-as perl itself>. Although correct in almost all cases, it should 
+as perl itself>. Although correct in almost all cases, it should
 really be probed rather than assumed.
 
 
@@ -252,7 +252,7 @@ C<cpan2dist>, C<rpm>, C<yum>
 
 
 C<CPANPLUS::Dist::Fedora> development takes place on
-L<https://svn.berlios.de/svnroot/repos/web-cpan/CPANPLUS-Dist/trunk/> 
+L<https://svn.berlios.de/svnroot/repos/web-cpan/CPANPLUS-Dist/trunk/>
 - feel free to join us.
 
 
@@ -282,7 +282,7 @@ Originally based on CPANPLUS-Dist-Mdv by:
 
 Jerome Quelin, C<< <jquelin at cpan.org> >>
 
-Shlomi Fish ( L<http://www.shlomifish.org/> ) changed it into 
+Shlomi Fish ( L<http://www.shlomifish.org/> ) changed it into
 CPANPLUS-Dist-Fedora.
 
 Chris Weyl C<< <cweyl@alumni.drew.edu> >> changed it again to
