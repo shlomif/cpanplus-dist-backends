@@ -11,7 +11,7 @@ package CPANPLUS::Dist::Fedora;
 use strict;
 use warnings;
 
-use base 'CPANPLUS::Dist::Base';
+use parent 'CPANPLUS::Dist::Base';
 
 use Cwd;
 use CPANPLUS::Error; # imported subs: error(), msg()
@@ -24,8 +24,6 @@ use Pod::POM::View::Text;
 use POSIX qw[ strftime ];
 use Text::Wrap;
 use Template;
-
-our $VERSION = '0.0.9';
 
 sub _get_spec_template
 {
@@ -267,7 +265,7 @@ sub prepare {
                 return (($br eq 'perl') ? $br : "perl($br)");
             },
 
-            packagervers => $VERSION,
+            packagervers => $CPANPLUS::Dist::Fedora::VERSION,
             # s/DISTEXTRA/join( "\n", @{ $status->extra_files || [] })/e;
             # ... FIXME
         },

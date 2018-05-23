@@ -1,5 +1,8 @@
 Revision history for CPANPLUS-Dist-Fedora
 
+0.0.10  2018-05-23
+    - Convert to Dist Zilla.
+
 0.0.9   2015-11-25
     - Make edit-metafile work for RPMs
         - https://rt.cpan.org/Public/Bug/Display.html?id=109170
