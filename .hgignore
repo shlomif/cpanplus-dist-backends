@@ -1,16 +1,1 @@
-syntax:glob
-CPANPLUS-Dist-RPM/blib
-CPANPLUS-Dist-RPM/_build
-CPANPLUS-Dist-RPM/Build
-CPANPLUS-Dist-RPM/Makefile.PL
-CPANPLUS-Dist-Fedora/blib
-CPANPLUS-Dist-Fedora/_build
-CPANPLUS-Dist-Fedora/Build
-CPANPLUS-Dist-Fedora/META.json
-CPANPLUS-Dist-Fedora/META.yml
-CPANPLUS-Dist-Fedora/MYMETA.json
-CPANPLUS-Dist-Fedora/MYMETA.yml
-
-syntax: regexp
-
-^CPANPLUS-Dist-Fedora/CPANPLUS-Dist-Fedora-v\d+\.\d+\.\d+(?:/|\.tar\.gz$)
+CPANPLUS-Dist-Fedora/.build
