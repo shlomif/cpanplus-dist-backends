@@ -1,5 +1,10 @@
 Revision history for CPANPLUS-Dist-Fedora
 
+0.2.0  2018-06-30
+    - Ported the extra_files functionality from ::Mageia .
+        - man1 / etc.
+        - see: https://bitbucket.org/shlomif/cpanplus-dist-backends/issues/1
+
 0.0.10  2018-05-23
     - Convert to Dist Zilla.
 

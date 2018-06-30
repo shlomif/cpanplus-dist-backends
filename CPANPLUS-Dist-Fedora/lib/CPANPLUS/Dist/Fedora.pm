@@ -94,6 +94,7 @@ rm -rf %{buildroot}
 %exclude %dir %{perl_vendorarch}/auto
 [% END -%]
 %{_mandir}/man3/*.3*
+[% distextra %]
 
 %changelog
 * [% date %] [% packager %] [% status.distvers %]-[% status.rpmvers %]
@@ -266,8 +267,7 @@ sub prepare {
             },
 
             packagervers => $CPANPLUS::Dist::Fedora::VERSION,
-            # s/DISTEXTRA/join( "\n", @{ $status->extra_files || [] })/e;
-            # ... FIXME
+            distextra => join( "\n", @{ $status->extra_files || [] }),
         },
         $status->specpath,
     );
