@@ -14,11 +14,11 @@ use warnings;
 use parent 'CPANPLUS::Dist::Base';
 
 use Cwd;
-use CPANPLUS::Error; # imported subs: error(), msg()
+use CPANPLUS::Error;    # imported subs: error(), msg()
 use File::Basename;
-use File::Copy      qw[ copy ];
-use IPC::Cmd        qw[ run can_run ];
-use List::Util      qw[ first ];
+use File::Copy qw[ copy ];
+use IPC::Cmd qw[ run can_run ];
+use List::Util qw[ first ];
 use Pod::POM;
 use Pod::POM::View::Text;
 use POSIX qw[ strftime ];
@@ -112,19 +112,22 @@ END_SPEC
 # Return a boolean indicating whether or not you can use this package to
 # create and install modules in your environment.
 #
-sub format_available {
+sub format_available
+{
     # Check Fedora release file
-    if ( not ( -f '/etc/fedora-release' or -f '/etc/redhat-release') ) {
-        error( 'Not on a Fedora system' );
+    if ( not( -f '/etc/fedora-release' or -f '/etc/redhat-release' ) )
+    {
+        error('Not on a Fedora system');
         return;
     }
 
     my $flag;
 
     # check prereqs
-    for my $prog ( qw[ rpm rpmbuild gcc ] ) {
+    for my $prog (qw[ rpm rpmbuild gcc ])
+    {
         next if can_run($prog);
-        error( "'$prog' is a required program to build Fedora packages" );
+        error("'$prog' is a required program to build Fedora packages");
         $flag++;
     }
 
@@ -140,26 +143,27 @@ sub format_available {
 # Sets up the C<CPANPLUS::Dist::Fedora> object for use, and return true if
 # everything went fine.
 #
-sub init {
+sub init
+{
     my ($self) = @_;
-    my $status = $self->status; # an Object::Accessor
-    # distname: Foo-Bar
-    # distvers: 1.23
-    # extra_files: qw[ /bin/foo /usr/bin/bar ]
-    # rpmname:     perl-Foo-Bar
-    # rpmpath:     $RPMDIR/RPMS/noarch/perl-Foo-Bar-1.23-1mdv2008.0.noarch.rpm
-    # rpmvers:     1
-    # rpmdir:      $DIR
-    # srpmpath:    $RPMDIR/SRPMS/perl-Foo-Bar-1.23-1mdv2008.0.src.rpm
-    # specpath:    $RPMDIR/SPECS/perl-Foo-Bar.spec
-    # is_noarch:   true if pure-perl
-    # license:     try to figure out the actual license
-    # summary:     one-liner summary
-    # description: a paragraph summary or so
+    my $status = $self->status;    # an Object::Accessor
+                                   # distname: Foo-Bar
+                                   # distvers: 1.23
+                                   # extra_files: qw[ /bin/foo /usr/bin/bar ]
+                                   # rpmname:     perl-Foo-Bar
+      # rpmpath:     $RPMDIR/RPMS/noarch/perl-Foo-Bar-1.23-1mdv2008.0.noarch.rpm
+      # rpmvers:     1
+      # rpmdir:      $DIR
+      # srpmpath:    $RPMDIR/SRPMS/perl-Foo-Bar-1.23-1mdv2008.0.src.rpm
+      # specpath:    $RPMDIR/SPECS/perl-Foo-Bar.spec
+      # is_noarch:   true if pure-perl
+      # license:     try to figure out the actual license
+      # summary:     one-liner summary
+      # description: a paragraph summary or so
     $status->mk_accessors(
         qw[ distname distvers extra_files rpmname rpmpath rpmvers rpmdir
             srpmpath specpath is_noarch license summary description
-          ]
+            ]
     );
 
     # This is done to initialise it.
@@ -168,35 +172,37 @@ sub init {
     return 1;
 }
 
-sub prepare {
-    my ($self, %args) = @_;
-    my $status = $self->status;               # Private hash
-    my $module = $self->parent;               # CPANPLUS::Module
-    my $intern = $module->parent;             # CPANPLUS::Internals
-    my $conf   = $intern->configure_object;   # CPANPLUS::Configure
-    my $distmm = $module->status->dist_cpan;  # CPANPLUS::Dist::MM
+sub prepare
+{
+    my ( $self, %args ) = @_;
+    my $status = $self->status;                 # Private hash
+    my $module = $self->parent;                 # CPANPLUS::Module
+    my $intern = $module->parent;               # CPANPLUS::Internals
+    my $conf   = $intern->configure_object;     # CPANPLUS::Configure
+    my $distmm = $module->status->dist_cpan;    # CPANPLUS::Dist::MM
 
     # Parse args.
     my %opts = (
-        force   => $conf->get_conf('force'),  # force rebuild
+        force   => $conf->get_conf('force'),     # force rebuild
         perl    => $^X,
         verbose => $conf->get_conf('verbose'),
         %args,
     );
 
     # Dry-run with makemaker: find build prereqs.
-    msg( "dry-run prepare with makemaker..." );
-    $self->SUPER::prepare( %args );
+    msg("dry-run prepare with makemaker...");
+    $self->SUPER::prepare(%args);
 
     # Compute & store package information
-    my $distname    = $module->package_name;
+    my $distname = $module->package_name;
     $status->distname($distname);
-    $status->distvers($module->package_version);
-    $status->summary(_module_summary($module));
-    $status->description(_module_description($module));
-    $status->license($self->_module_license($module));
+    $status->distvers( $module->package_version );
+    $status->summary( _module_summary($module) );
+    $status->description( _module_description($module) );
+    $status->license( $self->_module_license($module) );
+
     #$status->disttop($module->name=~ /([^:]+)::/);
-    my $dir = $status->rpmdir($self->_get_current_dir());
+    my $dir = $status->rpmdir( $self->_get_current_dir() );
     $status->rpmvers(1);
 
     # Cache files
@@ -210,44 +216,55 @@ sub prepare {
     # Files for %doc
     my @docfiles =
         grep { /(README|Change(s|log)|LICENSE)$/i }
-        map { basename $_ }
-        @files
-        ;
+        map  { basename $_ } @files;
 
     # Figure out if we're noarch or not
-    $status->is_noarch(do { first { /\.(c|xs)$/i } @files } ? 0 : 1);
+    $status->is_noarch(
+        do
+        {
+            first { /\.(c|xs)$/i } @files;
+            }
+        ? 0 : 1
+    );
 
     my $rpmname = _mk_pkg_name($distname);
-    $status->rpmname( $rpmname );
+    $status->rpmname($rpmname);
 
     # check whether package has been build.
-    if ( my $pkg = $self->_has_been_built($rpmname, $status->distvers) ) {
+    if ( my $pkg = $self->_has_been_built( $rpmname, $status->distvers ) )
+    {
         my $modname = $module->module;
-        msg( "already created package for '$modname' at '$pkg'" );
+        msg("already created package for '$modname' at '$pkg'");
 
-        if ( not $opts{force} ) {
-            msg( "won't re-spec package since --force isn't in use" );
+        if ( not $opts{force} )
+        {
+            msg("won't re-spec package since --force isn't in use");
+
             # c::d::mdv store
-            $status->rpmpath($pkg); # store the path of rpm
-            # cpanplus api
+            $status->rpmpath($pkg);    # store the path of rpm
+                                       # cpanplus api
             $status->prepared(1);
             $status->created(1);
             $status->dist($pkg);
             return $pkg;
+
             # XXX check if it works
         }
 
-        msg( '--force in use, re-specing anyway' );
+        msg('--force in use, re-specing anyway');
+
         # FIXME: bump rpm version
-    } else {
-        msg( "writing specfile for '$distname'..." );
+    }
+    else
+    {
+        msg("writing specfile for '$distname'...");
     }
 
     # Compute & store path of specfile.
     $status->specpath("$dir/$rpmname.spec");
 
     # Prepare our template
-    my $tmpl = Template->new({ EVAL_PERL => 1 });
+    my $tmpl = Template->new( { EVAL_PERL => 1 } );
 
     my $spec_template = $self->_get_spec_template();
 
@@ -258,25 +275,28 @@ sub prepare {
             status    => $status,
             module    => $module,
             buildreqs => $buildreqs,
-            date      => strftime("%a %b %d %Y", localtime),
+            date      => strftime( "%a %b %d %Y", localtime ),
             packager  => $self->_get_packager(),
-            docfiles  => join(' ', @docfiles),
-            rpm_req => sub {
+            docfiles  => join( ' ', @docfiles ),
+            rpm_req   => sub {
                 my $br = shift;
-                return (($br eq 'perl') ? $br : "perl($br)");
+                return ( ( $br eq 'perl' ) ? $br : "perl($br)" );
             },
 
             packagervers => $CPANPLUS::Dist::Fedora::VERSION,
-            distextra => join( "\n", @{ $status->extra_files || [] }),
+            distextra    => join( "\n", @{ $status->extra_files || [] } ),
         },
         $status->specpath,
     );
 
-    if ( $intern->_callbacks->munge_dist_metafile ) {
+    if ( $intern->_callbacks->munge_dist_metafile )
+    {
         print 'munging...';
 
         my $orig_contents = _read_file( $status->specpath );
-        my $new_contents = $intern->_callbacks->munge_dist_metafile->($intern, $orig_contents);
+        my $new_contents  = $intern->_callbacks->munge_dist_metafile->(
+            $intern, $orig_contents
+        );
         _write_file( $status->specpath, $new_contents );
     }
 
@@ -284,59 +304,63 @@ sub prepare {
     my $tarball = "$dir/" . basename $module->status->fetch;
     copy $module->status->fetch, $tarball;
 
-    msg( "specfile for '$distname' written" );
+    msg("specfile for '$distname' written");
+
     # return success
     $status->prepared(1);
     return 1;
 }
 
-
-sub create {
-    my ($self, %args) = @_;
-    my $status = $self->status;               # private hash
-    my $module = $self->parent;               # CPANPLUS::Module
-    my $intern = $module->parent;             # CPANPLUS::Internals
-    my $conf   = $intern->configure_object;   # CPANPLUS::Configure
-    my $distmm = $module->status->dist_cpan;  # CPANPLUS::Dist::MM
+sub create
+{
+    my ( $self, %args ) = @_;
+    my $status = $self->status;                 # private hash
+    my $module = $self->parent;                 # CPANPLUS::Module
+    my $intern = $module->parent;               # CPANPLUS::Internals
+    my $conf   = $intern->configure_object;     # CPANPLUS::Configure
+    my $distmm = $module->status->dist_cpan;    # CPANPLUS::Dist::MM
 
     # parse args.
     my %opts = (
-        force   => $conf->get_conf('force'),  # force rebuild
+        force   => $conf->get_conf('force'),     # force rebuild
         perl    => $^X,
         verbose => $conf->get_conf('verbose'),
         %args,
     );
 
     # check if we need to rebuild package.
-    if ( $status->created && defined $status->dist ) {
-        if ( not $opts{force} ) {
-            msg( "won't re-build package since --force isn't in use" );
+    if ( $status->created && defined $status->dist )
+    {
+        if ( not $opts{force} )
+        {
+            msg("won't re-build package since --force isn't in use");
             return $status->dist;
         }
-        msg( '--force in use, re-building anyway' );
+        msg('--force in use, re-building anyway');
     }
 
-    RPMBUILD: {
+RPMBUILD:
+    {
         # dry-run with makemaker: handle prereqs.
-        msg( 'dry-run build with makemaker...' );
-        $self->SUPER::create( %args );
-
+        msg('dry-run build with makemaker...');
+        $self->SUPER::create(%args);
 
         my $spec     = $status->specpath;
         my $distname = $status->distname;
         my $rpmname  = $status->rpmname;
 
-        msg( "Building '$distname' from specfile $spec..." );
+        msg("Building '$distname' from specfile $spec...");
 
         # dry-run, to see if we forgot some files
-        my ($buffer, $success);
+        my ( $buffer, $success );
         my $dir = $status->rpmdir;
-        DRYRUN: {
+    DRYRUN:
+        {
             local $ENV{LC_ALL} = 'C';
             $success = run(
+
                 #command => "rpmbuild -ba --quiet $spec",
-                command =>
-                    'rpmbuild -ba '
+                command => 'rpmbuild -ba '
                     . qq{--define '_sourcedir $dir' }
                     . qq{--define '_builddir $dir'  }
                     . qq{--define '_srcrpmdir $dir' }
@@ -348,14 +372,17 @@ sub create {
         }
 
         # check if the dry-run finished correctly
-        if ( $success ) {
-            my ($rpm)  = (sort glob "$dir/*/$rpmname-*.rpm")[-1];
-            my ($srpm) = (sort glob "$dir/$rpmname-*.src.rpm")[-1];
-            msg( "RPM created successfully: $rpm" );
-            msg( "SRPM available: $srpm" );
+        if ($success)
+        {
+            my ($rpm)  = ( sort glob "$dir/*/$rpmname-*.rpm" )[-1];
+            my ($srpm) = ( sort glob "$dir/$rpmname-*.src.rpm" )[-1];
+            msg("RPM created successfully: $rpm");
+            msg("SRPM available: $srpm");
+
             # c::d::mdv store
             $status->rpmpath($rpm);
             $status->srpmpath($srpm);
+
             # cpanplus api
             $status->created(1);
             $status->dist($rpm);
@@ -363,53 +390,59 @@ sub create {
         }
 
         # unknown error, aborting.
-        if ( not $buffer =~ /^\s+Installed .but unpackaged. file.s. found:\n(.*)\z/ms ) {
-            error( "Failed to create Fedora package for '$distname': $buffer" );
+        if (
+            not $buffer =~
+            /^\s+Installed .but unpackaged. file.s. found:\n(.*)\z/ms )
+        {
+            error("Failed to create Fedora package for '$distname': $buffer");
+
             # cpanplus api
             $status->created(0);
             return;
         }
 
         # additional files to be packaged
-        msg( "extra files installed, fixing spec file" );
+        msg("extra files installed, fixing spec file");
         my $files = $1;
-        $files =~ s/^\s+//mg; # remove spaces
+        $files =~ s/^\s+//mg;    # remove spaces
         my @files = split /\n/, $files;
         $status->extra_files( \@files );
         $self->prepare( %opts, force => 1 );
-        msg( 'restarting build phase' );
+        msg('restarting build phase');
         redo RPMBUILD;
     }
 }
 
-sub install {
-    my ($self, %args) = @_;
+sub install
+{
+    my ( $self, %args ) = @_;
     my $rpm = $self->status->rpm;
-    error( "installing $rpm" );
+    error("installing $rpm");
     die;
+
     #$dist->status->installed
 }
-
-
 
 #--
 # Private methods:
 
-sub _read_file {
+sub _read_file
+{
     my ($filename) = @_;
     open my $fh, '< :encoding(utf8)', $filename;
     local $/;
     my $contents = <$fh>;
-    close ($fh);
+    close($fh);
 
-    return $contents
+    return $contents;
 }
 
-sub _write_file {
-    my ($filename, $contents) = @_;
+sub _write_file
+{
+    my ( $filename, $contents ) = @_;
     open my $fh, '> :encoding(utf8)', $filename;
     print {$fh} $contents;
-    close ($fh);
+    close($fh);
 
     return;
 }
@@ -419,19 +452,21 @@ sub _write_file {
 #
 # Returns true if there's already a package built for this module.
 #
-sub _has_been_built {
-    my ($self, $name, $vers) = @_;
+sub _has_been_built
+{
+    my ( $self, $name, $vers ) = @_;
     my $RPMDIR = $self->_get_RPMDIR();
-    my $pkg = ( sort glob "$RPMDIR/RPMS/*/$name-$vers-*.rpm" )[-1];
+    my $pkg    = ( sort glob "$RPMDIR/RPMS/*/$name-$vers-*.rpm" )[-1];
     return $pkg;
+
     # FIXME: should we check cooker?
 }
-
 
 #--
 # Private subs
 
-sub _is_module_build_compat {
+sub _is_module_build_compat
+{
     my ($module) = @_;
     my $makefile = $module->_status->extract . '/Makefile.PL';
 
@@ -439,10 +474,10 @@ sub _is_module_build_compat {
 
     my $found = 0;
 
-    LINES:
-    while (my $line = <$mk_fh>)
+LINES:
+    while ( my $line = <$mk_fh> )
     {
-        if ($line =~ /Module::Build::Compat/)
+        if ( $line =~ /Module::Build::Compat/ )
         {
             $found = 1;
             last LINES;
@@ -454,7 +489,6 @@ sub _is_module_build_compat {
     return $found;
 }
 
-
 #
 # my $name = _mk_pkg_name($dist);
 #
@@ -462,7 +496,8 @@ sub _is_module_build_compat {
 # package. in most cases, it will be the same, but some pakcage name
 # will be too long as a rpm name: we'll have to cut it.
 #
-sub _mk_pkg_name {
+sub _mk_pkg_name
+{
     my ($dist) = @_;
     my $name = 'perl-' . $dist;
     return $name;
@@ -474,7 +509,7 @@ sub _mk_pkg_name {
 
 sub _module_license
 {
-    my $self = shift;
+    my $self   = shift;
     my $module = shift;
 
     return $self->_get_default_license();
@@ -492,28 +527,35 @@ sub _get_default_license
 # embedded pod in the extracted files. this would be the first paragraph
 # of the DESCRIPTION head1.
 #
-sub _module_description {
+sub _module_description
+{
     my ($module) = @_;
 
-    my $path = dirname $module->_status->extract; # where tarball has been extracted
+    my $path =
+        dirname $module->_status->extract;    # where tarball has been extracted
     my @docfiles =
-        map  { "$path/$_" }               # prepend extract directory
-        sort { length $a <=> length $b }  # sort by length: we prefer top-level module description
-        grep { /\.(pod|pm)$/ }            # filter out those that can contain pod
-        @{ $module->_status->files };     # list of embedded files
+        map { "$path/$_" }                    # prepend extract directory
+        sort { length $a <=> length $b } # sort by length: we prefer top-level module description
+        grep { /\.(pod|pm)$/ }           # filter out those that can contain pod
+        @{ $module->_status->files };    # list of embedded files
 
     # parse file, trying to find a header
     my $parser = Pod::POM->new;
-    DOCFILE:
-    foreach my $docfile ( @docfiles ) {
-        my $pom = $parser->parse_file($docfile);  # try to find some pod
-        next DOCFILE unless defined $pom;         # the file may contain no pod, that's ok
-        HEAD1:
-        foreach my $head1 ($pom->head1) {
+DOCFILE:
+    foreach my $docfile (@docfiles)
+    {
+        my $pom = $parser->parse_file($docfile);    # try to find some pod
+        next DOCFILE
+            unless defined $pom;    # the file may contain no pod, that's ok
+    HEAD1:
+        foreach my $head1 ( $pom->head1 )
+        {
             next HEAD1 unless $head1->title eq 'DESCRIPTION';
-            my $pom  = $head1->content;                         # get pod for DESCRIPTION paragraph
-            my $text = $pom->present('Pod::POM::View::Text');   # transform pod to text
-            my @paragraphs = (split /\n\n/, $text)[0..2];       # only the 3 first paragraphs
+            my $pom = $head1->content;    # get pod for DESCRIPTION paragraph
+            my $text =
+                $pom->present('Pod::POM::View::Text');   # transform pod to text
+            my @paragraphs =
+                ( split /\n\n/, $text )[ 0 .. 2 ]; # only the 3 first paragraphs
             return join "\n\n", @paragraphs;
         }
     }
@@ -521,34 +563,37 @@ sub _module_description {
     return 'no description found';
 }
 
-
 #
 # my $summary = _module_summary($module);
 #
 # Given a CPANPLUS::Module, return its registered description (if any)
 # or try to extract it from the embedded POD in the extracted files.
 #
-sub _module_summary {
+sub _module_summary
+{
     my ($module) = @_;
 
     # registered modules won't go farther...
     return $module->description if $module->description;
 
-    my $path = dirname $module->_status->extract; # where tarball has been extracted
+    my $path =
+        dirname $module->_status->extract;    # where tarball has been extracted
     my @docfiles =
-        map  { "$path/$_" }               # prepend extract directory
-        sort { length $a <=> length $b }  # sort by length: we prefer top-level module summary
-        grep { /\.(pod|pm)$/ }            # filter out those that can contain pod
-        @{ $module->_status->files };     # list of files embedded
+        map { "$path/$_" }                    # prepend extract directory
+        sort { length $a <=> length $b } # sort by length: we prefer top-level module summary
+        grep { /\.(pod|pm)$/ }           # filter out those that can contain pod
+        @{ $module->_status->files };    # list of files embedded
 
     # parse file, trying to find a header
     my $parser = Pod::POM->new;
-    DOCFILE:
-    foreach my $docfile ( @docfiles ) {
-        my $pom = $parser->parse_file($docfile);  # try to find some pod
-        next unless defined $pom;                 # the file may contain no pod, that's ok
-        HEAD1:
-        foreach my $head1 ($pom->head1) {
+DOCFILE:
+    foreach my $docfile (@docfiles)
+    {
+        my $pom = $parser->parse_file($docfile);    # try to find some pod
+        next unless defined $pom;    # the file may contain no pod, that's ok
+    HEAD1:
+        foreach my $head1 ( $pom->head1 )
+        {
             my $title = $head1->title;
             next HEAD1 unless $title eq 'NAME';
             my $content = $head1->content;
@@ -565,9 +610,9 @@ sub _get_RPMDIR
     my $self = shift;
 
     # Memoize it.
-    if (!defined($self->{_RPMDIR}))
+    if ( !defined( $self->{_RPMDIR} ) )
     {
-        chomp(my $d=qx[ rpm --eval %_topdir ]);
+        chomp( my $d = qx[ rpm --eval %_topdir ] );
         $self->{_RPMDIR} = $d;
     }
 
@@ -579,7 +624,7 @@ sub _get_packager
     my $self = shift;
 
     # Memoize it.
-    if (!defined($self->{_packager}))
+    if ( !defined( $self->{_packager} ) )
     {
         my $d = `rpm --eval '%{packager}'`;
         chomp $d;
@@ -594,7 +639,7 @@ sub _get_current_dir
     my $self = shift;
 
     # Memoize it.
-    if (!defined($self->{_current_dir}))
+    if ( !defined( $self->{_current_dir} ) )
     {
         $self->{_current_dir} = cwd();
     }

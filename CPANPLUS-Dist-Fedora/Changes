@@ -1,5 +1,9 @@
 Revision history for CPANPLUS-Dist-Fedora
 
+0.2.1  2019-08-24
+    - Moved the VCS repo to https://github.com/shlomif/cpanplus-dist-backends
+    - dzil cleanups.
+
 0.2.0  2018-06-30
     - Ported the extra_files functionality from ::Mageia .
         - man1 / etc.

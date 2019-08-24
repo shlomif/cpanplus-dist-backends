@@ -13,7 +13,9 @@ use warnings;
 
 use Test::More tests => 1;
 
-require_ok( 'CPANPLUS::Dist::Fedora' );
-diag( "Testing CPANPLUS::Dist::Fedora $CPANPLUS::Dist::Fedora::VERSION, Perl $], $^X" );
+require_ok('CPANPLUS::Dist::Fedora');
+diag(
+"Testing CPANPLUS::Dist::Fedora $CPANPLUS::Dist::Fedora::VERSION, Perl $], $^X"
+);
 
 exit;
