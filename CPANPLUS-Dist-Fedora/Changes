@@ -1,5 +1,12 @@
 Revision history for CPANPLUS-Dist-Fedora
 
+0.2.2  2020-01-28
+    - Rebuild for order of 'NAME' and 'VERSION' sections in the generated
+    POD documentation (see 0.001004 in
+    https://metacpan.org/changes/distribution/Pod-Weaver-PluginBundle-SHLOMIF
+    ).
+        - VERSION used to appear before NAME.
+
 0.2.1  2019-08-24
     - Moved the VCS repo to https://github.com/shlomif/cpanplus-dist-backends
     - dzil cleanups.

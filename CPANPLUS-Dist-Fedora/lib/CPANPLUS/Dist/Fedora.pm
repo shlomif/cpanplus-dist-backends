@@ -216,7 +216,7 @@ sub prepare
     # Files for %doc
     my @docfiles =
         grep { /(README|Change(s|log)|LICENSE)$/i }
-        map  { basename $_ } @files;
+        map { basename $_ } @files;
 
     # Figure out if we're noarch or not
     $status->is_noarch(
@@ -224,7 +224,8 @@ sub prepare
         {
             first { /\.(c|xs)$/i } @files;
             }
-        ? 0 : 1
+        ? 0
+        : 1
     );
 
     my $rpmname = _mk_pkg_name($distname);
