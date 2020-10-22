@@ -1,5 +1,12 @@
 Revision history for CPANPLUS-Dist-Fedora
 
+0.2.3   2020-10-22
+    - dist.ini / weaver.ini / .tidyallrc / etc. cleanup
+        - Move to @SHLOMIF
+        - Inspired by Lady_Aleena.
+    - Remove stale docs.
+    - Correct copyright year and holder.
+
 0.2.2  2020-01-28
     - Rebuild for order of 'NAME' and 'VERSION' sections in the generated
     POD documentation (see 0.001004 in
