@@ -656,13 +656,9 @@ __END__
 
 CPANPLUS::Dist::Fedora - a cpanplus backend to build Fedora/RedHat rpms
 
-
-
 =head1 SYNOPSIS
 
     cpan2dist --format=CPANPLUS::Dist::Fedora Some::Random::Package
-
-
 
 =head1 DESCRIPTION
 
@@ -678,8 +674,6 @@ manually via rpm.
 Note that these packages are built automatically from CPAN and are
 assumed to have the same license as perl and come without support.
 Please always refer to the original CPAN package if you have questions.
-
-
 
 =head1 CLASS METHODS
 
@@ -758,7 +752,7 @@ really be probed rather than assumed.
 
 =item o Long description
 
-Right now we provided the description as given by the module in it's
+Right now we provided the description as given by the module in its
 meta data. However, not all modules provide this meta data and rather
 than scanning the files in the package for it, we simply default to the
 name of the module.
@@ -766,48 +760,10 @@ name of the module.
 
 =back
 
-
-
-=head1 BUGS
-
-Please report any bugs or feature requests to C<< < cpanplus-dist-fedora at
-rt.cpan.org> >>, or through the web interface at
-L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=CPANPLUS-Dist-Fedora>.  I
-will be notified, and then you'll automatically be notified of progress
-on your bug as I make changes.
-
-
-
 =head1 SEE ALSO
 
 L<CPANPLUS::Backend>, L<CPANPLUS::Module>, L<CPANPLUS::Dist>,
-C<cpan2dist>, C<rpm>, C<yum>
-
-
-C<CPANPLUS::Dist::Fedora> development takes place on
-L<https://svn.berlios.de/svnroot/repos/web-cpan/CPANPLUS-Dist/trunk/>
-- feel free to join us.
-
-
-You can also look for information on this module at:
-
-=over 4
-
-=item * AnnoCPAN: Annotated CPAN documentation
-
-L<http://annocpan.org/dist/CPANPLUS-Dist-Fedora>
-
-=item * CPAN Ratings
-
-L<http://cpanratings.perl.org/d/CPANPLUS-Dist-Fedora>
-
-=item * RT: CPAN's request tracker
-
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=CPANPLUS-Dist-Fedora>
-
-=back
-
-
+C<cpan2dist>, C<rpm>, C<yum>, L<CPANPLUS::Dist::Mageia>.
 
 =head1 AUTHOR
 
@@ -830,4 +786,3 @@ Modified by Shlomi Fish, 2008 - all ownership disclaimed.
 Modified again by Chris Weyl <cweyl@alumni.drew.edu> 2008.
 
 =cut
-
