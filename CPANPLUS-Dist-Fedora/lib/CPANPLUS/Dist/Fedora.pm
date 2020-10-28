@@ -50,6 +50,9 @@ Requires:  perl(:MODULE_COMPAT_%(eval "`[% perl_exe %] -V:version`"; echo $versi
 Requires: [% rpm_req(br) %][% IF (brs.$br != 0) %] >= [% brs.$br %][% END %]
 [% END -%]
 BuildRequires: perl(ExtUtils::MakeMaker)
+BuildRequires: perl-devel
+BuildRequires: perl-generators
+BuildRequires: perl-interpreter
 [% FOREACH br = brs.keys.sort -%]
 BuildRequires: [% rpm_req(br) %][% IF (brs.$br != 0) %] >= [% brs.$br %][% END %]
 [% END -%]
