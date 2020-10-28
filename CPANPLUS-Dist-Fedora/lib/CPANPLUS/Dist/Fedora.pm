@@ -13,17 +13,21 @@ use warnings;
 
 use parent 'CPANPLUS::Dist::Base';
 
-use Cwd;
-use CPANPLUS::Error;    # imported subs: error(), msg()
-use File::Basename;
+use Cwd qw[ cwd ];
+use CPANPLUS::Error qw[ error msg ];
+use File::Basename qw[ basename dirname ];
 use File::Copy qw[ copy ];
 use IPC::Cmd qw[ run can_run ];
 use List::Util qw[ first ];
-use Pod::POM;
-use Pod::POM::View::Text;
+use Pod::POM             ();
+use Pod::POM::View::Text ();
 use POSIX qw[ strftime ];
-use Text::Wrap;
-use Template;
+use Template ();
+
+sub _get_spec_perl_exe
+{
+    return 'perl';
+}
 
 sub _get_spec_template
 {
@@ -40,7 +44,7 @@ Summary:    [% status.summary %]
 Source:     http://search.cpan.org/CPAN/[% module.path %]/[% status.distname %]-%{version}.[% module.package_extension %]
 Url:        http://metacpan.org/release/[% status.distname %]
 BuildRoot:  %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-Requires:  perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
+Requires:  perl(:MODULE_COMPAT_%(eval "`[% perl_exe %] -V:version`"; echo $version))
 [% IF status.is_noarch %]BuildArch:  noarch[% END %]
 [% brs = buildreqs; FOREACH br = brs.keys.sort -%]
 Requires: [% rpm_req(br) %][% IF (brs.$br != 0) %] >= [% brs.$br %][% END %]
@@ -60,9 +64,9 @@ BuildRequires: [% rpm_req(br) %][% IF (brs.$br != 0) %] >= [% brs.$br %][% END %
 
 %build
 [% IF (!status.is_noarch) -%]
-%{__perl} Makefile.PL INSTALLDIRS=vendor OPTIMIZE="%{optflags}" INSTALLVENDORLIB=%{perl_vendorlib} INSTALLVENDORMAN3DIR=%{_mandir}/man3
+[% perl %] Makefile.PL INSTALLDIRS=vendor OPTIMIZE="%{optflags}" INSTALLVENDORLIB=%{perl_vendorlib} INSTALLVENDORMAN3DIR=%{_mandir}/man3
 [% ELSE -%]
-%{__perl} Makefile.PL INSTALLDIRS=vendor INSTALLVENDORLIB=%{perl_vendorlib} INSTALLVENDORMAN3DIR=%{_mandir}/man3
+[% perl %] Makefile.PL INSTALLDIRS=vendor INSTALLVENDORLIB=%{perl_vendorlib} INSTALLVENDORMAN3DIR=%{_mandir}/man3
 [% END -%]
 make %{?_smp_mflags}
 
@@ -277,6 +281,7 @@ sub prepare
             module    => $module,
             buildreqs => $buildreqs,
             date      => strftime( "%a %b %d %Y", localtime ),
+            perl_exe  => $self->_get_spec_perl_exe(),
             packager  => $self->_get_packager(),
             docfiles  => join( ' ', @docfiles ),
             rpm_req   => sub {
