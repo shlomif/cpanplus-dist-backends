@@ -35,6 +35,9 @@ sub _get_spec_template
     # So we're going to use the Template Toolkit instead
     return <<'END_SPEC';
 
+[% BLOCK rpm_req_wrap %]
+[% rpm_prefix %] [% rpm_req(br) %][% IF (brs.$br != 0) %] >= [% brs.$br %][% END %]
+[% END %]
 Name:       [% status.rpmname %]
 Version:    [% status.distvers %]
 Release:    [% status.rpmvers %]%{?dist}
@@ -47,14 +50,14 @@ BuildRoot:  %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires:  perl(:MODULE_COMPAT_%(eval "`[% perl_exe %] -V:version`"; echo $version))
 [% IF status.is_noarch %]BuildArch:  noarch[% END %]
 [% brs = buildreqs; FOREACH br = brs.keys.sort -%]
-Requires: [% rpm_req(br) %][% IF (brs.$br != 0) %] >= [% brs.$br %][% END %]
+[% INCLUDE rpm_req_wrap br = br , prefix = "Requires:" %]
 [% END -%]
 BuildRequires: perl(ExtUtils::MakeMaker)
 BuildRequires: perl-devel
 BuildRequires: perl-generators
 BuildRequires: perl-interpreter
 [% FOREACH br = brs.keys.sort -%]
-BuildRequires: [% rpm_req(br) %][% IF (brs.$br != 0) %] >= [% brs.$br %][% END %]
+[% INCLUDE rpm_req_wrap br = br , prefix = "BuildRequires:" %]
 [% END -%]
 
 
