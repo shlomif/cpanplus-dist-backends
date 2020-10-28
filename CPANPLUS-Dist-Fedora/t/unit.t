@@ -2,16 +2,68 @@
 
 use strict;
 use warnings;
-use Test::More tests => 1;
+use Test::More tests => 8;
 
-use CPANPLUS::Dist::Fedora ();
 use CPANPLUS::Backend      ();
+use CPANPLUS::Dist::Fedora ();
 
-my $cpanb = CPANPLUS::Backend->new;
+$ENV{'PERL_MM_USE_DEFAULT'} = 1;
+my $cpanb    = CPANPLUS::Backend->new or die;
+my $ModName  = "Acme::Gosub";
+my $conf_obj = $cpanb->configure_object();
+
+$cpanb->_callbacks->send_test_report( sub { 0 } );
+$conf_obj->set_conf( cpantest                  => 0 );
+$conf_obj->set_conf( allow_build_interactivity => 0 );
+my $mod = $cpanb->module_tree($ModName);
+
+# TEST
+ok( $mod, "Loaded object for: " . $mod->name );
+
+# TEST
+ok(
+    CPANPLUS::Dist::Fedora->format_available,
+    "CPANPLUS::Dist::Fedora Format is available"
+);
+
+$conf_obj->set_conf( dist_type => 'CPANPLUS::Dist::Fedora' );
 {
-    my $obj = CPANPLUS::Dist::Fedora->new(
-        module => $cpanb->module_tree('Acme::Gosub'), );
+    # TEST
+    ok( $mod->fetch, "Fetching module to " . $mod->status->fetch );
+
+    # TEST
+    ok( $mod->extract, "Extracting module to " . $mod->status->extract );
+
+    my $needed_preparation_for_obj_prepare = sub {
+        my $TARGET_INIT = 'init';
+        my $dist        = $mod->dist( target => $TARGET_INIT );
+
+        # TEST
+        ok( $dist, "Dist created with target => " . $TARGET_INIT );
+
+        # TEST
+        ok( !$dist->status->prepared, "   Prepare was not run" );
+    };
+
+    $needed_preparation_for_obj_prepare->();
+
+    my $obj = CPANPLUS::Dist::Fedora->new( module => $mod, );
+
+    die "\$obj module is falsey" if not $mod;
 
     # TEST
     is( $obj->_get_spec_perl_exe(), 'perl', "_get_spec_perl_exe()" );
+
+    # TEST
+    like(
+        do
+        {
+            local $CPANPLUS::Dist::Fedora::_testme = 1;
+            eval { $obj->prepare(); };
+            my $Err = $@;
+            ref($Err) ? $Err->{text} : $Err;
+        },
+        qr#^BuildRequires:\s*perl\(Carp\)$#ms,
+        "BuildRequires",
+    );
 }

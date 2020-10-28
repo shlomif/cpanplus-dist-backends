@@ -18,11 +18,14 @@ use CPANPLUS::Error qw[ error msg ];
 use File::Basename qw[ basename dirname ];
 use File::Copy qw[ copy ];
 use IPC::Cmd qw[ run can_run ];
-use List::Util qw[ first ];
+use List::Util qw[ first min ];
+use Path::Tiny qw[ path ];
 use Pod::POM             ();
 use Pod::POM::View::Text ();
 use POSIX qw[ strftime ];
 use Template ();
+
+$CPANPLUS::Dist::Fedora::_testme = 0;
 
 sub _get_spec_perl_exe
 {
@@ -50,14 +53,14 @@ BuildRoot:  %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires:  perl(:MODULE_COMPAT_%(eval "`[% perl_exe %] -V:version`"; echo $version))
 [% IF status.is_noarch %]BuildArch:  noarch[% END %]
 [% brs = buildreqs; FOREACH br = brs.keys.sort -%]
-[% INCLUDE rpm_req_wrap br = br , prefix = "Requires:" %]
+[% INCLUDE rpm_req_wrap br = br , rpm_prefix = "Requires:" %]
 [% END -%]
 BuildRequires: perl(ExtUtils::MakeMaker)
 BuildRequires: perl-devel
 BuildRequires: perl-generators
 BuildRequires: perl-interpreter
 [% FOREACH br = brs.keys.sort -%]
-[% INCLUDE rpm_req_wrap br = br , prefix = "BuildRequires:" %]
+[% INCLUDE rpm_req_wrap br = br , rpm_prefix = "BuildRequires:" %]
 [% END -%]
 
 
@@ -70,9 +73,9 @@ BuildRequires: perl-interpreter
 
 %build
 [% IF (!status.is_noarch) -%]
-[% perl %] Makefile.PL INSTALLDIRS=vendor OPTIMIZE="%{optflags}" INSTALLVENDORLIB=%{perl_vendorlib} INSTALLVENDORMAN3DIR=%{_mandir}/man3
+[% perl_exe %] Makefile.PL INSTALLDIRS=vendor OPTIMIZE="%{optflags}" INSTALLVENDORLIB=%{perl_vendorlib} INSTALLVENDORMAN3DIR=%{_mandir}/man3
 [% ELSE -%]
-[% perl %] Makefile.PL INSTALLDIRS=vendor INSTALLVENDORLIB=%{perl_vendorlib} INSTALLVENDORMAN3DIR=%{_mandir}/man3
+[% perl_exe %] Makefile.PL INSTALLDIRS=vendor INSTALLVENDORLIB=%{perl_vendorlib} INSTALLVENDORMAN3DIR=%{_mandir}/man3
 [% END -%]
 make %{?_smp_mflags}
 
@@ -182,9 +185,64 @@ sub init
     return 1;
 }
 
+sub _calc_spec_text
+{
+    my $self   = shift;
+    my $module = $self->parent;                         # CPANPLUS::Module
+    my $tmpl   = Template->new( { EVAL_PERL => 1 } );
+    my $status = $self->status;                         # Private hash
+
+    my @files = @{ $module->status->files };
+
+    # Files for %doc
+    my @docfiles =
+        grep { /(README|Change(s|log)|LICENSE)$/i }
+        map { basename $_ } @files;
+
+    my $spec_template = $self->_get_spec_template();
+
+    my $spec_text = '';
+
+    # Handle build/test/requires
+    my $buildreqs = $module->status->prereqs;
+    $buildreqs->{'Module::Build::Compat'} = 0
+        if _is_module_build_compat($module);
+
+    # Process template into spec
+    $tmpl->process(
+        \$spec_template,
+        {
+            status    => $status,
+            module    => $module,
+            buildreqs => $buildreqs,
+            date      => strftime( "%a %b %d %Y", localtime ),
+            perl_exe  => $self->_get_spec_perl_exe(),
+            packager  => $self->_get_packager(),
+            docfiles  => join( ' ', @docfiles ),
+            rpm_req   => sub {
+                my $br = shift;
+                return ( ( $br eq 'perl' ) ? $br : "perl($br)" );
+            },
+
+            packagervers => $CPANPLUS::Dist::Fedora::VERSION,
+            distextra    => join( "\n", @{ $status->extra_files || [] } ),
+        },
+        \$spec_text,
+    );
+
+    my $ret = +{ text => $spec_text, };
+    if ($CPANPLUS::Dist::Fedora::_testme)
+    {
+        die $ret;
+    }
+    return $ret;
+}
+
 sub prepare
 {
     my ( $self, %args ) = @_;
+    msg("dry-run prepare with makemaker...");
+    $self->SUPER::prepare(%args);
     my $status = $self->status;                 # Private hash
     my $module = $self->parent;                 # CPANPLUS::Module
     my $intern = $module->parent;               # CPANPLUS::Internals
@@ -200,8 +258,6 @@ sub prepare
     );
 
     # Dry-run with makemaker: find build prereqs.
-    msg("dry-run prepare with makemaker...");
-    $self->SUPER::prepare(%args);
 
     # Compute & store package information
     my $distname = $module->package_name;
@@ -217,16 +273,6 @@ sub prepare
 
     # Cache files
     my @files = @{ $module->status->files };
-
-    # Handle build/test/requires
-    my $buildreqs = $module->status->prereqs;
-    $buildreqs->{'Module::Build::Compat'} = 0
-        if _is_module_build_compat($module);
-
-    # Files for %doc
-    my @docfiles =
-        grep { /(README|Change(s|log)|LICENSE)$/i }
-        map { basename $_ } @files;
 
     # Figure out if we're noarch or not
     $status->is_noarch(
@@ -275,31 +321,8 @@ sub prepare
     $status->specpath("$dir/$rpmname.spec");
 
     # Prepare our template
-    my $tmpl = Template->new( { EVAL_PERL => 1 } );
-
-    my $spec_template = $self->_get_spec_template();
-
-    # Process template into spec
-    $tmpl->process(
-        \$spec_template,
-        {
-            status    => $status,
-            module    => $module,
-            buildreqs => $buildreqs,
-            date      => strftime( "%a %b %d %Y", localtime ),
-            perl_exe  => $self->_get_spec_perl_exe(),
-            packager  => $self->_get_packager(),
-            docfiles  => join( ' ', @docfiles ),
-            rpm_req   => sub {
-                my $br = shift;
-                return ( ( $br eq 'perl' ) ? $br : "perl($br)" );
-            },
-
-            packagervers => $CPANPLUS::Dist::Fedora::VERSION,
-            distextra    => join( "\n", @{ $status->extra_files || [] } ),
-        },
-        $status->specpath,
-    );
+    my $text = $self->_calc_spec_text()->{text};
+    path( $status->specpath )->spew_utf8($text);
 
     if ( $intern->_callbacks->munge_dist_metafile )
     {
@@ -566,8 +589,9 @@ DOCFILE:
             my $pom = $head1->content;    # get pod for DESCRIPTION paragraph
             my $text =
                 $pom->present('Pod::POM::View::Text');   # transform pod to text
-            my @paragraphs =
-                ( split /\n\n/, $text )[ 0 .. 2 ]; # only the 3 first paragraphs
+            my @paragraphs = ( split /\n\n/, $text );
+            @paragraphs = @paragraphs[ 0 .. min( $#paragraphs, 2 ) ]
+                ;    # only the 3 first paragraphs
             return join "\n\n", @paragraphs;
         }
     }
