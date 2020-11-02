@@ -31,14 +31,14 @@ ok(
 # TEST
 ok( IS_CONFOBJ->( conf => $conf_obj ), "Configure object found" );
 $conf_obj->set_conf( dist_type => 'CPANPLUS::Dist::Fedora' );
-my $opts = {};
 {
     # TEST
     ok( $mod->fetch, "Fetching module to " . $mod->status->fetch );
 
     # TEST
     ok( $mod->extract, "Extracting module to " . $mod->status->extract );
-    {
+
+    my $needed_preparation_for_obj_prepare = sub {
         my $dist = $mod->dist( target => TARGET_INIT );
 
         # TEST
@@ -46,7 +46,9 @@ my $opts = {};
 
         # TEST
         ok( !$dist->status->prepared, "   Prepare was not run" );
-    }
+    };
+
+    $needed_preparation_for_obj_prepare->();
 
     my $obj = CPANPLUS::Dist::Fedora->new( module => $mod, );
 
