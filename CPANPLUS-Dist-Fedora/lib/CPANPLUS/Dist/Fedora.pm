@@ -79,7 +79,7 @@ BuildRequires: perl-interpreter
 
 %install
 %{make_install}
-find %{buildroot} -type f -name .packlist -exec rm -f {} ';'
+find %{buildroot} -type f \( -name .packlist -o -name perllocal.pod \) -exec rm -f {} ';'
 [% IF (!status.is_noarch) -%]
 find %{buildroot} -type f -name '*.bs' -a -size 0 -exec rm -f {} ';'
 [% END -%]
@@ -91,8 +91,8 @@ find %{buildroot} -depth -type d -exec rmdir {} 2>/dev/null ';'
 make test
 
 %files
-%defattr(-,root,root,-)
-[% IF licensefiles %]%license [% licensefiles %][% END -%]
+%defattr(-,root,root,-)[% "\n" %]
+[%- IF licensefiles %]%license [% licensefiles _ "\n" %][%- END -%]
 %doc [% docfiles %]
 [% IF (status.is_noarch) -%]
 %{perl_vendorlib}/*
