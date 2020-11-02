@@ -99,35 +99,19 @@ if (0)
 
     die "\$obj module is falsey" if not $mod;
 
-    # my $obj = $mod->status->dist;
-
-    # $obj->create();
-    # die if not $obj->parent;
-    # die if not $obj->status;
-    # die if not $obj->status->dist;
-    # die if not $obj->status->dist_cpan;
-
-    # $obj->parent->status( $obj->status );
-
-    # $obj->status->create();
-
     # TEST
     is( $obj->_get_spec_perl_exe(), 'perl', "_get_spec_perl_exe()" );
 
-    # $obj->init();
-    # $obj->parent->status( $obj->status );
     # TEST
-    {
-        local $CPANPLUS::Dist::Fedora::_testme = 1;
-        like(
-            do
-            {
-                eval { $obj->prepare(); };
-                my $Err = $@;
-                ref($Err) ? $Err->{text} : $Err;
-            },
-            qr#^BuildRequires:\s*perl\(Carp\)$#ms,
-            "BuildRequires",
-        );
-    }
+    like(
+        do
+        {
+            local $CPANPLUS::Dist::Fedora::_testme = 1;
+            eval { $obj->prepare(); };
+            my $Err = $@;
+            ref($Err) ? $Err->{text} : $Err;
+        },
+        qr#^BuildRequires:\s*perl\(Carp\)$#ms,
+        "BuildRequires",
+    );
 }
