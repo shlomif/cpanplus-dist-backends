@@ -1,5 +1,9 @@
 Revision history for CPANPLUS-Dist-Fedora
 
+0.4.0   2020-11-02
+    - Add t/unit.t .
+    - Fixes for recent Fedora guidelines.
+
 0.2.3   2020-10-22
     - dist.ini / weaver.ini / .tidyallrc / etc. cleanup
         - Move to @SHLOMIF

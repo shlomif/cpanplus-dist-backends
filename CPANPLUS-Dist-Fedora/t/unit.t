@@ -1,5 +1,8 @@
 #!/usr/bin/env perl
 
+# Parts of this file have been copy+pasted+changed from the testsuite
+# of https://metacpan.org/pod/CPANPLUS and from cpan2dist - thanks!
+
 use strict;
 use warnings;
 use Test::More tests => 8;
