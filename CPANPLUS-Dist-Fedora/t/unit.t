@@ -133,28 +133,4 @@ if (0)
             "BuildRequires",
         );
     }
-
-    # $obj->prepare();
-
-    my $target = 'create';
-
-    if (0)
-    {
-        local $CPANPLUS::Dist::Fedora::_testme = 1;
-        like(
-            do
-            {
-                eval {
-                    $obj->create(
-                        prereq_target => $target,
-                        target        => $target,
-                    );
-                };
-                my $Err = $@;
-                ref($Err) ? $Err->{text} : $Err;
-            },
-            qr#^BuildRequires:\s*perl\(Carp\)$#ms,
-            "BuildRequires",
-        );
-    }
 }
