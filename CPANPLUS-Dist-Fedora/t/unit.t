@@ -19,10 +19,10 @@ my $conf    = $cpanb->configure_object();
 $cpanb->_callbacks->send_test_report( sub { 0 } );
 $conf->set_conf( cpantest                  => 0 );
 $conf->set_conf( allow_build_interactivity => 0 );
-my $Mod = $cpanb->module_tree($ModName);
+my $mod = $cpanb->module_tree($ModName);
 
 # TEST
-ok( $Mod, "Loaded object for: " . $Mod->name );
+ok( $mod, "Loaded object for: " . $mod->name );
 
 # TEST
 ok(
@@ -76,17 +76,13 @@ if (0)
     }
 }
 {
-    #my $mod = $cpanb->parse_module( module => 'Acme::Gosub' );
-    my $mod = $Mod;
-    die if not $mod;
+    # TEST
+    ok( $mod->fetch, "Fetching module to " . $mod->status->fetch );
 
     # TEST
-    ok( $Mod->fetch, "Fetching module to " . $Mod->status->fetch );
-
-    # TEST
-    ok( $Mod->extract, "Extracting module to " . $Mod->status->extract );
+    ok( $mod->extract, "Extracting module to " . $mod->status->extract );
     {
-        my $dist = $Mod->dist( target => TARGET_INIT );
+        my $dist = $mod->dist( target => TARGET_INIT );
 
         # TEST
         ok( $dist, "Dist created with target => " . TARGET_INIT );
