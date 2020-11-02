@@ -32,45 +32,6 @@ ok(
 ok( IS_CONFOBJ->( conf => $conf_obj ), "Configure object found" );
 $conf_obj->set_conf( dist_type => 'CPANPLUS::Dist::Fedora' );
 my $opts = {};
-$cpanb->reload_indices() if $opts->{'flushcache'};
-
-if (0)
-{
-    ok( $cpanb->reload_indices( 0 ? ( update_source => 0, ) : (), ),
-        "Rebuilding trees" );
-}
-{
-    my $set_conf = $opts->{'set-config'} || {};
-    while ( my ( $key, $val ) = each %$set_conf )
-    {
-        $conf_obj->set_conf( $key => $val );
-    }
-}
-{
-    my $set_prog = $opts->{'set-program'} || {};
-    while ( my ( $key, $val ) = each %$set_prog )
-    {
-        $conf_obj->set_program( $key => $val );
-    }
-}
-{
-    my %map = (
-        verbose  => 'verbose',
-        force    => 'force',
-        skiptest => 'skiptest',
-        makefile => 'prefer_makefile'
-    );
-
-    ### set config options from arguments
-    while ( my ( $key, $val ) = each %map )
-    {
-        my $bool =
-            exists $opts->{$key}
-            ? $opts->{$key}
-            : $conf_obj->get_conf($val);
-        $conf_obj->set_conf( $val => $bool );
-    }
-}
 {
     # TEST
     ok( $mod->fetch, "Fetching module to " . $mod->status->fetch );
