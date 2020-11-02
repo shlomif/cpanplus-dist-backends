@@ -3,11 +3,12 @@
 use strict;
 use warnings;
 use Carp::Always;
-use Test::More tests => 4;
+use Test::More tests => 5;
 
 use CPANPLUS::Configure;
 use CPANPLUS::Backend;
 use CPANPLUS::Dist;
+use CPANPLUS::Dist::Fedora;
 use CPANPLUS::Dist::MM;
 use CPANPLUS::Internals::Constants;
 use Data::Dumper;
@@ -37,6 +38,15 @@ $conf->set_conf( allow_build_interactivity => 0 );
 my $Mod = $cb->module_tree($ModName);
 
 # TEST
+ok( $Mod, "Loaded object for: " . $Mod->name );
+
+# TEST
+ok(
+    CPANPLUS::Dist::Fedora->format_available,
+    "CPANPLUS::Dist::Fedora Format is available"
+);
+
+# TEST
 ok( scalar keys %$mt, "Module tree has entries" );
 
 # TEST
@@ -44,9 +54,15 @@ ok( scalar keys %$at, "Author tree has entries" );
 my %formats  = map { $_ => $_ } CPANPLUS::Dist->dist_types;
 my $conf_obj = $cpanb->configure_object;
 ok( IS_CONFOBJ->( conf => $conf_obj ), "Configure object found" );
-$conf->set_conf( dist_type => 'CPANPLUS::Dist::Base' );
+$conf->set_conf( dist_type => 'CPANPLUS::Dist::Fedora' );
 my $opts = {};
 $cpanb->reload_indices() if $opts->{'flushcache'};
+
+if (0)
+{
+    ok( $cb->reload_indices( 0 ? ( update_source => 0, ) : (), ),
+        "Rebuilding trees" );
+}
 {
     my $set_conf = $opts->{'set-config'} || {};
     while ( my ( $key, $val ) = each %$set_conf )
@@ -83,6 +99,17 @@ $cpanb->reload_indices() if $opts->{'flushcache'};
     #my $mod = $cpanb->parse_module( module => 'Acme::Gosub' );
     my $mod = $Mod;
     die if not $mod;
+
+    # TEST
+    ok( $Mod->fetch, "Fetching module to " . $Mod->status->fetch );
+
+    # TEST
+    ok( $Mod->extract, "Extracting module to " . $Mod->status->extract );
+    {
+        my $dist = $Mod->dist( target => TARGET_INIT );
+        ok( $dist, "Dist created with target => " . TARGET_INIT );
+        ok( !$dist->status->prepared, "   Prepare was not run" );
+    }
 
     # my $obj = CPANPLUS::Dist::Fedora->new( module => $mod, );
     my $obj = CPANPLUS::Dist::Base->new( module => $mod, );
