@@ -9,10 +9,8 @@ use CPANPLUS::Backend;
 use CPANPLUS::Dist;
 use CPANPLUS::Dist::Fedora;
 use CPANPLUS::Dist::MM;
-use CPANPLUS::Internals::Constants;
 use CPANPLUS::Error;
 use CPANPLUS::Internals::Constants;
-use Config;
 
 # use CPANPLUS::Dist::Fedora ();
 use CPANPLUS::Dist::Base ();
