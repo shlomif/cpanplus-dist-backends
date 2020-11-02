@@ -49,12 +49,13 @@ Group:      Development/Libraries
 Summary:    [% status.summary %]
 Source:     http://search.cpan.org/CPAN/[% module.path %]/[% status.distname %]-%{version}.[% module.package_extension %]
 Url:        http://metacpan.org/release/[% status.distname %]
-BuildRoot:  %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires:  perl(:MODULE_COMPAT_%(eval "`[% perl_exe %] -V:version`"; echo $version))
 [% IF status.is_noarch %]BuildArch:  noarch[% END %]
 [% brs = buildreqs; FOREACH br = brs.keys.sort -%]
 [% INCLUDE rpm_req_wrap br = br , rpm_prefix = "Requires:" %]
 [% END -%]
+BuildRequires: coreutils
+BuildRequires: make
 BuildRequires: perl(ExtUtils::MakeMaker)
 BuildRequires: perl-devel
 BuildRequires: perl-generators
@@ -80,8 +81,6 @@ BuildRequires: perl-interpreter
 make %{?_smp_mflags}
 
 %install
-rm -rf %{buildroot}
-
 make pure_install PERL_INSTALL_ROOT=%{buildroot}
 find %{buildroot} -type f -name .packlist -exec rm -f {} ';'
 [% IF (!status.is_noarch) -%]
@@ -94,11 +93,9 @@ find %{buildroot} -depth -type d -exec rmdir {} 2>/dev/null ';'
 %check
 make test
 
-%clean
-rm -rf %{buildroot}
-
 %files
 %defattr(-,root,root,-)
+[% IF licensefiles %]%license [% licensefiles %][% END -%]
 %doc [% docfiles %]
 [% IF (status.is_noarch) -%]
 %{perl_vendorlib}/*
@@ -194,11 +191,15 @@ sub _calc_spec_text
 
     my @files = @{ $module->status->files };
 
-    # Files for %doc
-    my @docfiles =
-        grep { /(README|Change(s|log)|LICENSE)$/i }
+    my @basenames =
         map { basename $_ } @files;
 
+    # Files for %doc
+    my @docfiles =
+        grep { /(?:README|Change(?:s|log))$/i } @basenames;
+
+    my @licensefiles =
+        grep { /(?:LICENSE)$/i } @basenames;
     my $spec_template = $self->_get_spec_template();
 
     my $spec_text = '';
@@ -212,14 +213,15 @@ sub _calc_spec_text
     $tmpl->process(
         \$spec_template,
         {
-            status    => $status,
-            module    => $module,
-            buildreqs => $buildreqs,
-            date      => strftime( "%a %b %d %Y", localtime ),
-            perl_exe  => $self->_get_spec_perl_exe(),
-            packager  => $self->_get_packager(),
-            docfiles  => join( ' ', @docfiles ),
-            rpm_req   => sub {
+            status       => $status,
+            module       => $module,
+            buildreqs    => $buildreqs,
+            date         => strftime( "%a %b %d %Y", localtime ),
+            perl_exe     => $self->_get_spec_perl_exe(),
+            packager     => $self->_get_packager(),
+            docfiles     => join( ' ', @docfiles ),
+            licensefiles => join( ' ', @licensefiles ),
+            rpm_req      => sub {
                 my $br = shift;
                 return ( ( $br eq 'perl' ) ? $br : "perl($br)" );
             },
