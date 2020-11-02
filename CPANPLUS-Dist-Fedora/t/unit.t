@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 use Carp::Always;
-use Test::More tests => 5;
+use Test::More tests => 11;
 
 use CPANPLUS::Configure;
 use CPANPLUS::Backend;
@@ -53,6 +53,8 @@ ok( scalar keys %$mt, "Module tree has entries" );
 ok( scalar keys %$at, "Author tree has entries" );
 my %formats  = map { $_ => $_ } CPANPLUS::Dist->dist_types;
 my $conf_obj = $cpanb->configure_object;
+
+# TEST
 ok( IS_CONFOBJ->( conf => $conf_obj ), "Configure object found" );
 $conf->set_conf( dist_type => 'CPANPLUS::Dist::Fedora' );
 my $opts = {};
@@ -107,12 +109,17 @@ if (0)
     ok( $Mod->extract, "Extracting module to " . $Mod->status->extract );
     {
         my $dist = $Mod->dist( target => TARGET_INIT );
+
+        # TEST
         ok( $dist, "Dist created with target => " . TARGET_INIT );
+
+        # TEST
         ok( !$dist->status->prepared, "   Prepare was not run" );
     }
 
-    # my $obj = CPANPLUS::Dist::Fedora->new( module => $mod, );
-    my $obj = CPANPLUS::Dist::Base->new( module => $mod, );
+    my $obj = CPANPLUS::Dist::Fedora->new( module => $mod, );
+
+    # my $obj = CPANPLUS::Dist::Base->new( module => $mod, );
     die "\$obj module is falsey" if not $mod;
 
     # my $obj = $mod->status->dist;
@@ -128,29 +135,43 @@ if (0)
     # $obj->status->create();
 
     # TEST
-    # is( $obj->_get_spec_perl_exe(), 'perl', "_get_spec_perl_exe()" );
+    is( $obj->_get_spec_perl_exe(), 'perl', "_get_spec_perl_exe()" );
 
     # $obj->init();
     # $obj->parent->status( $obj->status );
-    # $obj->create();
-    $obj->prepare();
-
-    my $target = 'create';
-
     # TEST
     {
         local $CPANPLUS::Dist::Fedora::_testme = 1;
         like(
             do
             {
-                # eval {
-                {
+                eval { $obj->prepare(); };
+                my $Err = $@;
+                ref($Err) ? $Err->{text} : $Err;
+            },
+            qr#^BuildRequires:\s*perl\(Carp\)$#ms,
+            "BuildRequires",
+        );
+    }
+
+    # $obj->prepare();
+
+    my $target = 'create';
+
+    if (0)
+    {
+        local $CPANPLUS::Dist::Fedora::_testme = 1;
+        like(
+            do
+            {
+                eval {
                     $obj->create(
                         prereq_target => $target,
                         target        => $target,
                     );
                 };
-                $@->{text};
+                my $Err = $@;
+                ref($Err) ? $Err->{text} : $Err;
             },
             qr#^BuildRequires:\s*perl\(Carp\)$#ms,
             "BuildRequires",

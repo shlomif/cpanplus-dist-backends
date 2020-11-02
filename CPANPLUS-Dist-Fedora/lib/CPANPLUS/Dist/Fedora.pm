@@ -18,12 +18,14 @@ use CPANPLUS::Error qw[ error msg ];
 use File::Basename qw[ basename dirname ];
 use File::Copy qw[ copy ];
 use IPC::Cmd qw[ run can_run ];
-use List::Util qw[ first ];
+use List::Util qw[ first min ];
 use Path::Tiny qw[ path ];
 use Pod::POM             ();
 use Pod::POM::View::Text ();
 use POSIX qw[ strftime ];
 use Template ();
+
+$CPANPLUS::Dist::Fedora::_testme = 0;
 
 sub _get_spec_perl_exe
 {
@@ -51,14 +53,14 @@ BuildRoot:  %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires:  perl(:MODULE_COMPAT_%(eval "`[% perl_exe %] -V:version`"; echo $version))
 [% IF status.is_noarch %]BuildArch:  noarch[% END %]
 [% brs = buildreqs; FOREACH br = brs.keys.sort -%]
-[% INCLUDE rpm_req_wrap br = br , prefix = "Requires:" %]
+[% INCLUDE rpm_req_wrap br = br , rpm_prefix = "Requires:" %]
 [% END -%]
 BuildRequires: perl(ExtUtils::MakeMaker)
 BuildRequires: perl-devel
 BuildRequires: perl-generators
 BuildRequires: perl-interpreter
 [% FOREACH br = brs.keys.sort -%]
-[% INCLUDE rpm_req_wrap br = br , prefix = "BuildRequires:" %]
+[% INCLUDE rpm_req_wrap br = br , rpm_prefix = "BuildRequires:" %]
 [% END -%]
 
 
@@ -71,9 +73,9 @@ BuildRequires: perl-interpreter
 
 %build
 [% IF (!status.is_noarch) -%]
-[% perl %] Makefile.PL INSTALLDIRS=vendor OPTIMIZE="%{optflags}" INSTALLVENDORLIB=%{perl_vendorlib} INSTALLVENDORMAN3DIR=%{_mandir}/man3
+[% perl_exe %] Makefile.PL INSTALLDIRS=vendor OPTIMIZE="%{optflags}" INSTALLVENDORLIB=%{perl_vendorlib} INSTALLVENDORMAN3DIR=%{_mandir}/man3
 [% ELSE -%]
-[% perl %] Makefile.PL INSTALLDIRS=vendor INSTALLVENDORLIB=%{perl_vendorlib} INSTALLVENDORMAN3DIR=%{_mandir}/man3
+[% perl_exe %] Makefile.PL INSTALLDIRS=vendor INSTALLVENDORLIB=%{perl_vendorlib} INSTALLVENDORMAN3DIR=%{_mandir}/man3
 [% END -%]
 make %{?_smp_mflags}
 
@@ -587,8 +589,9 @@ DOCFILE:
             my $pom = $head1->content;    # get pod for DESCRIPTION paragraph
             my $text =
                 $pom->present('Pod::POM::View::Text');   # transform pod to text
-            my @paragraphs =
-                ( split /\n\n/, $text )[ 0 .. 2 ]; # only the 3 first paragraphs
+            my @paragraphs = ( split /\n\n/, $text );
+            @paragraphs = @paragraphs[ 0 .. min( $#paragraphs, 2 ) ]
+                ;    # only the 3 first paragraphs
             return join "\n\n", @paragraphs;
         }
     }
