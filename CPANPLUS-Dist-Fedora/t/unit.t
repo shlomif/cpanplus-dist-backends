@@ -12,13 +12,13 @@ use CPANPLUS::Internals::Constants;
 use CPANPLUS::Backend ();
 
 $ENV{'PERL_MM_USE_DEFAULT'} = 1;
-my $cpanb   = CPANPLUS::Backend->new or die;
-my $ModName = "Acme::Gosub";
-my $conf    = $cpanb->configure_object();
+my $cpanb    = CPANPLUS::Backend->new or die;
+my $ModName  = "Acme::Gosub";
+my $conf_obj = $cpanb->configure_object();
 
 $cpanb->_callbacks->send_test_report( sub { 0 } );
-$conf->set_conf( cpantest                  => 0 );
-$conf->set_conf( allow_build_interactivity => 0 );
+$conf_obj->set_conf( cpantest                  => 0 );
+$conf_obj->set_conf( allow_build_interactivity => 0 );
 my $mod = $cpanb->module_tree($ModName);
 
 # TEST
@@ -30,11 +30,9 @@ ok(
     "CPANPLUS::Dist::Fedora Format is available"
 );
 
-my $conf_obj = $cpanb->configure_object;
-
 # TEST
 ok( IS_CONFOBJ->( conf => $conf_obj ), "Configure object found" );
-$conf->set_conf( dist_type => 'CPANPLUS::Dist::Fedora' );
+$conf_obj->set_conf( dist_type => 'CPANPLUS::Dist::Fedora' );
 my $opts = {};
 $cpanb->reload_indices() if $opts->{'flushcache'};
 
@@ -47,14 +45,14 @@ if (0)
     my $set_conf = $opts->{'set-config'} || {};
     while ( my ( $key, $val ) = each %$set_conf )
     {
-        $conf->set_conf( $key => $val );
+        $conf_obj->set_conf( $key => $val );
     }
 }
 {
     my $set_prog = $opts->{'set-program'} || {};
     while ( my ( $key, $val ) = each %$set_prog )
     {
-        $conf->set_program( $key => $val );
+        $conf_obj->set_program( $key => $val );
     }
 }
 {
@@ -71,8 +69,8 @@ if (0)
         my $bool =
             exists $opts->{$key}
             ? $opts->{$key}
-            : $conf->get_conf($val);
-        $conf->set_conf( $val => $bool );
+            : $conf_obj->get_conf($val);
+        $conf_obj->set_conf( $val => $bool );
     }
 }
 {
