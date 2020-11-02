@@ -37,10 +37,7 @@ sub _get_spec_template
     # Dealing with DATA gets increasingly messy, IMHO
     # So we're going to use the Template Toolkit instead
     return <<'END_SPEC';
-
-[% BLOCK rpm_req_wrap %]
-[% rpm_prefix %] [% rpm_req(br) %][% IF (brs.$br != 0) %] >= [% brs.$br %][% END %]
-[% END %]
+[% BLOCK rpm_req_wrap %][%- rpm_prefix %] [% rpm_req(br) -%][%- IF (brs.$br != 0) %] >= [% brs.$br %][% END -%][%- "\n" -%][% END %]
 Name:       [% status.rpmname %]
 Version:    [% status.distvers %]
 Release:    [% status.rpmvers %]%{?dist}
@@ -78,10 +75,10 @@ BuildRequires: perl-interpreter
 [% ELSE -%]
 [% perl_exe %] Makefile.PL INSTALLDIRS=vendor INSTALLVENDORLIB=%{perl_vendorlib} INSTALLVENDORMAN3DIR=%{_mandir}/man3
 [% END -%]
-make %{?_smp_mflags}
+%{make_build}
 
 %install
-make pure_install PERL_INSTALL_ROOT=%{buildroot}
+%{make_install}
 find %{buildroot} -type f -name .packlist -exec rm -f {} ';'
 [% IF (!status.is_noarch) -%]
 find %{buildroot} -type f -name '*.bs' -a -size 0 -exec rm -f {} ';'
@@ -260,6 +257,11 @@ sub prepare
     );
 
     # Dry-run with makemaker: find build prereqs.
+    if (0)
+    {
+        msg("dry-run prepare with makemaker...");
+        $self->SUPER::prepare(%args);
+    }
 
     # Compute & store package information
     my $distname = $module->package_name;
@@ -323,8 +325,10 @@ sub prepare
     $status->specpath("$dir/$rpmname.spec");
 
     # Prepare our template
-    my $text = $self->_calc_spec_text()->{text};
-    path( $status->specpath )->spew_utf8($text);
+    my $text     = $self->_calc_spec_text()->{text};
+    my $specpath = path( $status->specpath );
+    $specpath->spew_utf8($text);
+    print "spec file written $specpath\n";
 
     if ( $intern->_callbacks->munge_dist_metafile )
     {
