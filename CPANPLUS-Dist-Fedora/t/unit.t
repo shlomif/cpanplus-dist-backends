@@ -5,11 +5,9 @@ use warnings;
 use Carp::Always;
 use Test::More tests => 9;
 
-use CPANPLUS::Backend;
-use CPANPLUS::Dist::Fedora;
+use CPANPLUS::Backend      ();
+use CPANPLUS::Dist::Fedora ();
 use CPANPLUS::Internals::Constants;
-
-use CPANPLUS::Backend ();
 
 $ENV{'PERL_MM_USE_DEFAULT'} = 1;
 my $cpanb    = CPANPLUS::Backend->new or die;
