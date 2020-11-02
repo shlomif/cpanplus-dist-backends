@@ -25,16 +25,15 @@ use CPANPLUS::Backend    ();
 
 $ENV{'PERL_MM_USE_DEFAULT'} = 1;
 my $cpanb   = CPANPLUS::Backend->new or die;
-my $cb      = $cpanb;
 my $ModName = "Acme::Gosub";
-my $mt      = $cb->module_tree;
-my $at      = $cb->author_tree;
+my $mt      = $cpanb->module_tree;
+my $at      = $cpanb->author_tree;
 my $conf    = $cpanb->configure_object();
 
-$cb->_callbacks->send_test_report( sub { 0 } );
+$cpanb->_callbacks->send_test_report( sub { 0 } );
 $conf->set_conf( cpantest                  => 0 );
 $conf->set_conf( allow_build_interactivity => 0 );
-my $Mod = $cb->module_tree($ModName);
+my $Mod = $cpanb->module_tree($ModName);
 
 # TEST
 ok( $Mod, "Loaded object for: " . $Mod->name );
@@ -61,7 +60,7 @@ $cpanb->reload_indices() if $opts->{'flushcache'};
 
 if (0)
 {
-    ok( $cb->reload_indices( 0 ? ( update_source => 0, ) : (), ),
+    ok( $cpanb->reload_indices( 0 ? ( update_source => 0, ) : (), ),
         "Rebuilding trees" );
 }
 {
