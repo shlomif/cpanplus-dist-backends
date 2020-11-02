@@ -7,7 +7,6 @@ use Test::More tests => 10;
 
 use CPANPLUS::Backend;
 use CPANPLUS::Dist::Fedora;
-use CPANPLUS::Error;
 use CPANPLUS::Internals::Constants;
 
 use CPANPLUS::Backend ();
