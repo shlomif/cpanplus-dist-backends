@@ -6,9 +6,7 @@ use Carp::Always;
 use Test::More tests => 10;
 
 use CPANPLUS::Backend;
-use CPANPLUS::Dist;
 use CPANPLUS::Dist::Fedora;
-use CPANPLUS::Dist::MM;
 use CPANPLUS::Error;
 use CPANPLUS::Internals::Constants;
 
@@ -36,7 +34,6 @@ ok(
 
 # TEST
 ok( scalar keys %$at, "Author tree has entries" );
-my %formats  = map { $_ => $_ } CPANPLUS::Dist->dist_types;
 my $conf_obj = $cpanb->configure_object;
 
 # TEST
