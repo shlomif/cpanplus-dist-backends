@@ -10,14 +10,9 @@ use CPANPLUS::Dist;
 use CPANPLUS::Dist::Fedora;
 use CPANPLUS::Dist::MM;
 use CPANPLUS::Internals::Constants;
-use Data::Dumper;
 use CPANPLUS::Error;
 use CPANPLUS::Internals::Constants;
-use Cwd;
 use Config;
-use Data::Dumper;
-use File::Basename ();
-use File::Spec     ();
 
 # use CPANPLUS::Dist::Fedora ();
 use CPANPLUS::Dist::Base ();
