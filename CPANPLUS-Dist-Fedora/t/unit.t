@@ -12,9 +12,7 @@ use CPANPLUS::Dist::MM;
 use CPANPLUS::Error;
 use CPANPLUS::Internals::Constants;
 
-# use CPANPLUS::Dist::Fedora ();
-use CPANPLUS::Dist::Base ();
-use CPANPLUS::Backend    ();
+use CPANPLUS::Backend ();
 
 $ENV{'PERL_MM_USE_DEFAULT'} = 1;
 my $cpanb   = CPANPLUS::Backend->new or die;
@@ -106,7 +104,6 @@ if (0)
 
     my $obj = CPANPLUS::Dist::Fedora->new( module => $mod, );
 
-    # my $obj = CPANPLUS::Dist::Base->new( module => $mod, );
     die "\$obj module is falsey" if not $mod;
 
     # my $obj = $mod->status->dist;
