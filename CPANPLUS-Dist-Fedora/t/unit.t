@@ -5,7 +5,6 @@ use warnings;
 use Carp::Always;
 use Test::More tests => 11;
 
-use CPANPLUS::Configure;
 use CPANPLUS::Backend;
 use CPANPLUS::Dist;
 use CPANPLUS::Dist::Fedora;
