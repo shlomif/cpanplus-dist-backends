@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 use Carp::Always;
-use Test::More tests => 11;
+use Test::More tests => 10;
 
 use CPANPLUS::Backend;
 use CPANPLUS::Dist;
@@ -19,7 +19,6 @@ use CPANPLUS::Backend    ();
 $ENV{'PERL_MM_USE_DEFAULT'} = 1;
 my $cpanb   = CPANPLUS::Backend->new or die;
 my $ModName = "Acme::Gosub";
-my $mt      = $cpanb->module_tree;
 my $at      = $cpanb->author_tree;
 my $conf    = $cpanb->configure_object();
 
@@ -36,9 +35,6 @@ ok(
     CPANPLUS::Dist::Fedora->format_available,
     "CPANPLUS::Dist::Fedora Format is available"
 );
-
-# TEST
-ok( scalar keys %$mt, "Module tree has entries" );
 
 # TEST
 ok( scalar keys %$at, "Author tree has entries" );
