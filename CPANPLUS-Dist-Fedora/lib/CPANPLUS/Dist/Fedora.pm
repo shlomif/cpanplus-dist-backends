@@ -70,16 +70,19 @@ BuildRequires: perl-interpreter
 %setup -q -n [% status.distname %]-%{version}
 
 %build
+[%- SET makefile_pl_common = "INSTALLDIRS=vendor NO_PERLLOCAL=1 NO_PACKLIST=1" -%]
 [% IF (!status.is_noarch) -%]
-[% perl_exe %] Makefile.PL INSTALLDIRS=vendor OPTIMIZE="%{optflags}" INSTALLVENDORLIB=%{perl_vendorlib} INSTALLVENDORMAN3DIR=%{_mandir}/man3
+[% perl_exe %] Makefile.PL [% makefile_pl_common %] OPTIMIZE="%{optflags}"
 [% ELSE -%]
-[% perl_exe %] Makefile.PL INSTALLDIRS=vendor INSTALLVENDORLIB=%{perl_vendorlib} INSTALLVENDORMAN3DIR=%{_mandir}/man3
+[% perl_exe %] Makefile.PL [% makefile_pl_common %]
 [% END -%]
 %{make_build}
 
 %install
 %{make_install}
+[%- IF 0 -%]
 find %{buildroot} -type f \( -name .packlist -o -name perllocal.pod \) -exec rm -f {} ';'
+[%- END -%]
 [% IF (!status.is_noarch) -%]
 find %{buildroot} -type f -name '*.bs' -a -size 0 -exec rm -f {} ';'
 [% END -%]
@@ -91,7 +94,9 @@ find %{buildroot} -depth -type d -exec rmdir {} 2>/dev/null ';'
 make test
 
 %files
+[%- IF 0 -%]
 %defattr(-,root,root,-)[% "\n" %]
+[%- END -%]
 [%- IF licensefiles %]%license [% licensefiles _ "\n" %][%- END -%]
 %doc [% docfiles %]
 [% IF (status.is_noarch) -%]
