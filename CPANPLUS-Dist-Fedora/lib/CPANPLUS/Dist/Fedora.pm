@@ -37,6 +37,7 @@ sub _get_spec_template
     # Dealing with DATA gets increasingly messy, IMHO
     # So we're going to use the Template Toolkit instead
     return <<'END_SPEC';
+[% SET makefile_pl_common = "INSTALLDIRS=vendor NO_PERLLOCAL=1 NO_PACKLIST=1" %]
 [% BLOCK rpm_req_wrap %][%- rpm_prefix %] [% rpm_req(br) -%][%- IF (brs.$br != 0) %] >= [% brs.$br %][% END -%][%- "\n" -%][% END %]
 Name:       [% status.rpmname %]
 Version:    [% status.distvers %]
@@ -69,7 +70,6 @@ BuildRequires: perl-interpreter
 %prep
 %setup -q -n [% status.distname %]-%{version}
 
-[%- SET makefile_pl_common = "INSTALLDIRS=vendor NO_PERLLOCAL=1 NO_PACKLIST=1" -%]
 %build
 [% IF (!status.is_noarch) -%]
 [% perl_exe %] Makefile.PL [% makefile_pl_common %] OPTIMIZE="%{optflags}"
@@ -80,7 +80,7 @@ BuildRequires: perl-interpreter
 
 %install
 %{make_install}
-[%- IF 0 -%]
+[% IF 0 -%]
 find %{buildroot} -type f \( -name .packlist -o -name perllocal.pod \) -exec rm -f {} ';'
 [%- END -%]
 [% IF (!status.is_noarch) -%]
