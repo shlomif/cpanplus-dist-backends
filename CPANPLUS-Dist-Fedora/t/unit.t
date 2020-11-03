@@ -5,7 +5,7 @@
 
 use strict;
 use warnings;
-use Test::More tests => 8;
+use Test::More tests => 10;
 
 use CPANPLUS::Backend      ();
 use CPANPLUS::Dist::Fedora ();
@@ -57,16 +57,20 @@ $conf_obj->set_conf( dist_type => 'CPANPLUS::Dist::Fedora' );
     # TEST
     is( $obj->_get_spec_perl_exe(), 'perl', "_get_spec_perl_exe()" );
 
+    my $spec_text = do
+    {
+        local $CPANPLUS::Dist::Fedora::_testme = 1;
+        eval { $obj->prepare(); };
+        my $Err = $@;
+        ref($Err) ? $Err->{text} : $Err;
+    };
+
     # TEST
-    like(
-        do
-        {
-            local $CPANPLUS::Dist::Fedora::_testme = 1;
-            eval { $obj->prepare(); };
-            my $Err = $@;
-            ref($Err) ? $Err->{text} : $Err;
-        },
-        qr#^BuildRequires:\s*perl\(Carp\)$#ms,
-        "BuildRequires",
-    );
+    like( $spec_text, qr#^BuildRequires:\s*perl\(Carp\)$#ms, "BuildRequires", );
+
+    # TEST
+    like( $spec_text, qr#^%build\nperl Makefile\.PL#ms, "spec", );
+
+    # TEST
+    unlike( $spec_text, qr#^%buildperl#ms, "buildperl absence in spec", );
 }

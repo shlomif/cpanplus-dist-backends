@@ -69,8 +69,8 @@ BuildRequires: perl-interpreter
 %prep
 %setup -q -n [% status.distname %]-%{version}
 
-%build
 [%- SET makefile_pl_common = "INSTALLDIRS=vendor NO_PERLLOCAL=1 NO_PACKLIST=1" -%]
+%build
 [% IF (!status.is_noarch) -%]
 [% perl_exe %] Makefile.PL [% makefile_pl_common %] OPTIMIZE="%{optflags}"
 [% ELSE -%]
