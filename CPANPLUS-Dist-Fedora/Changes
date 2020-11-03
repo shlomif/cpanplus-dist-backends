@@ -1,5 +1,9 @@
 Revision history for CPANPLUS-Dist-Fedora
 
+0.4.1   2020-11-03
+    - Fixes for recent Fedora guidelines.
+    - Added tests.
+
 0.4.0   2020-11-02
     - Add t/unit.t .
     - Fixes for recent Fedora guidelines.
