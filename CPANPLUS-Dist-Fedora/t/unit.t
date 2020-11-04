@@ -5,7 +5,17 @@
 
 use strict;
 use warnings;
-use Test::More tests => 11;
+
+use Test::More;
+
+if ( not( $ENV{'TEST_CPANPLUS_FEDORA'} ) )
+{
+    plan skip_all => "TEST_CPANPLUS_FEDORA is not set. Skipping.";
+}
+else
+{
+    plan tests => 11;
+}
 
 use CPANPLUS::Backend      ();
 use CPANPLUS::Dist::Fedora ();
