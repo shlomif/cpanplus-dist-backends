@@ -1,7 +1,7 @@
 Revision history for CPANPLUS-Dist-Fedora
 
 0.4.2   2020-11-04
-    - skip failing tests if TEST_CPANPLUS_FEDORA is not set.
+    - skip failing tests if $TEST_CPANPLUS_FEDORA is not set.
         - https://github.com/shlomif/cpanplus-dist-backends/issues/1
             - "Test suite fails on non-Fedora/CentOS systems"
         - Thanks to SREZIC for the report
