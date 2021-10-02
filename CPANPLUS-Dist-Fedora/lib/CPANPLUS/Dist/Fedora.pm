@@ -97,8 +97,8 @@ make test
 [%- IF 0 -%]
 %defattr(-,root,root,-)[% "\n" %]
 [%- END -%]
-[%- IF licensefiles %]%license [% licensefiles _ "\n" %][%- END -%]
-%doc [% docfiles %]
+[%- IF licensefiles %][% "\n" %]%license [% licensefiles _ "\n" %][%- END -%]
+[% "\n" %]%doc [% docfiles %]
 [% IF (status.is_noarch) -%]
 %{perl_vendorlib}/*
 [% ELSE -%]
@@ -175,7 +175,7 @@ sub init
     $status->mk_accessors(
         qw[ distname distvers extra_files rpmname rpmpath rpmvers rpmdir
             srpmpath specpath is_noarch license summary description
-            ]
+        ]
     );
 
     # This is done to initialise it.

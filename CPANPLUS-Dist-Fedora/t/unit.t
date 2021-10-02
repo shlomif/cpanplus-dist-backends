@@ -14,7 +14,7 @@ if ( not( $ENV{'TEST_CPANPLUS_FEDORA'} ) )
 }
 else
 {
-    plan tests => 11;
+    plan tests => 12;
 }
 
 use CPANPLUS::Backend      ();
@@ -86,4 +86,7 @@ $conf_obj->set_conf( dist_type => 'CPANPLUS::Dist::Fedora' );
 
     # TEST
     like( $spec_text, qr#\n\n%install\n%\{make_install\}\n#ms, "install", );
+
+    # TEST
+    like( $spec_text, qr#\n\n%files\n%doc #ms, "files", );
 }
