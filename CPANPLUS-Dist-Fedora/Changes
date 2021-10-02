@@ -1,5 +1,8 @@
 Revision history for CPANPLUS-Dist-Fedora
 
+0.4.3   2021-10-02
+    - Fix missing newlines in %files/%doc section.
+
 0.4.2   2020-11-04
     - skip failing tests if $TEST_CPANPLUS_FEDORA is not set.
         - https://github.com/shlomif/cpanplus-dist-backends/issues/1
