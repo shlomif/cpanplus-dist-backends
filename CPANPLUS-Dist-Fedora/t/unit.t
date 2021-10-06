@@ -14,7 +14,7 @@ if ( not( $ENV{'TEST_CPANPLUS_FEDORA'} ) )
 }
 else
 {
-    plan tests => 15;
+    plan tests => 16;
 }
 
 use CPANPLUS::Backend      ();
@@ -103,4 +103,7 @@ $conf_obj->set_conf( dist_type => 'CPANPLUS::Dist::Fedora' );
         qr#^find %\{buildroot\} -depth -type d -exec rmdir#ms,
         "remove empty dirs not needed in Fedora."
     );
+
+    # TEST
+    like( $spec_text, qr#\A\S#ms, "spec does now start with whitespace", );
 }

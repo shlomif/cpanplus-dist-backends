@@ -235,6 +235,8 @@ sub _calc_spec_text
         \$spec_text,
     );
 
+    $spec_text =~ s/\A\s+//ms;
+
     my $ret = +{ text => $spec_text, };
     if ($CPANPLUS::Dist::Fedora::_testme)
     {

@@ -1,5 +1,11 @@
 Revision history for CPANPLUS-Dist-Fedora
 
+0.4.4   2021-10-06
+    - .spec fixes per Fedora review:
+        - https://bugzilla.redhat.com/show_bug.cgi?id=2010688
+        - Thanks to Jitka
+    - Remove leading newlines from *.spec.
+
 0.4.3   2021-10-02
     - Fix missing newlines in %files/%doc section.
 
