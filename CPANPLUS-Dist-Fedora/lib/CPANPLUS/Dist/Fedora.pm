@@ -45,7 +45,7 @@ Release:    [% status.rpmvers %]%{?dist}
 License:    [% status.license %]
 Group:      Development/Libraries
 Summary:    [% status.summary %]
-Source:     http://search.cpan.org/CPAN/[% module.path %]/[% status.distname %]-%{version}.[% module.package_extension %]
+Source:     https://cpan.metacpan.org/[% module.path %]/[% status.distname %]-%{version}.[% module.package_extension %]
 Url:        http://metacpan.org/release/[% status.distname %]
 Requires:  perl(:MODULE_COMPAT_%(eval "`[% perl_exe %] -V:version`"; echo $version))
 [% IF status.is_noarch %]BuildArch:  noarch[% END %]

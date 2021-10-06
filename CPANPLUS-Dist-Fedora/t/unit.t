@@ -14,7 +14,7 @@ if ( not( $ENV{'TEST_CPANPLUS_FEDORA'} ) )
 }
 else
 {
-    plan tests => 12;
+    plan tests => 13;
 }
 
 use CPANPLUS::Backend      ();
@@ -89,4 +89,8 @@ $conf_obj->set_conf( dist_type => 'CPANPLUS::Dist::Fedora' );
 
     # TEST
     like( $spec_text, qr#\n\n%files\n%doc #ms, "files", );
+
+    # TEST
+    like( $spec_text, qr#^Source:\s+https://cpan\.metacpan\.org/authors/id/#ms,
+        "metacpan", );
 }
