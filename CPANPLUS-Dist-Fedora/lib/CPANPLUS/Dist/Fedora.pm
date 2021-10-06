@@ -53,7 +53,7 @@ Requires:  perl(:MODULE_COMPAT_%(eval "`[% perl_exe %] -V:version`"; echo $versi
 [% END -%]
 BuildRequires: coreutils
 BuildRequires: make
-BuildRequires: perl(ExtUtils::MakeMaker)
+BuildRequires: perl(ExtUtils::MakeMaker) >= 6.76
 BuildRequires: perl-devel
 BuildRequires: perl-generators
 BuildRequires: perl-interpreter
@@ -83,9 +83,11 @@ BuildRequires: perl-interpreter
 find %{buildroot} -type f \( -name .packlist -o -name perllocal.pod \) -exec rm -f {} ';'
 [%- END -%]
 [% IF (!status.is_noarch) -%]
-find %{buildroot} -type f -name '*.bs' -a -size 0 -exec rm -f {} ';'
+find %{buildroot} -type f -name '*.bs' -empty -delete
 [% END -%]
+[% IF 0 -%]
 find %{buildroot} -depth -type d -exec rmdir {} 2>/dev/null ';'
+[% END %]
 
 %{_fixperms} %{buildroot}/*
 

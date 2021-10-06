@@ -14,7 +14,7 @@ if ( not( $ENV{'TEST_CPANPLUS_FEDORA'} ) )
 }
 else
 {
-    plan tests => 14;
+    plan tests => 15;
 }
 
 use CPANPLUS::Backend      ();
@@ -96,4 +96,11 @@ $conf_obj->set_conf( dist_type => 'CPANPLUS::Dist::Fedora' );
 
     # TEST
     unlike( $spec_text, qr#^Group:#ms, "Group: absence in spec", );
+
+    # TEST
+    unlike(
+        $spec_text,
+        qr#^find %\{buildroot\} -depth -type d -exec rmdir#ms,
+        "remove empty dirs not needed in Fedora."
+    );
 }
