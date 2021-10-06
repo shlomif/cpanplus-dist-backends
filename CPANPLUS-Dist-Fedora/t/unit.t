@@ -14,7 +14,7 @@ if ( not( $ENV{'TEST_CPANPLUS_FEDORA'} ) )
 }
 else
 {
-    plan tests => 13;
+    plan tests => 14;
 }
 
 use CPANPLUS::Backend      ();
@@ -93,4 +93,7 @@ $conf_obj->set_conf( dist_type => 'CPANPLUS::Dist::Fedora' );
     # TEST
     like( $spec_text, qr#^Source:\s+https://cpan\.metacpan\.org/authors/id/#ms,
         "metacpan", );
+
+    # TEST
+    unlike( $spec_text, qr#^Group:#ms, "Group: absence in spec", );
 }

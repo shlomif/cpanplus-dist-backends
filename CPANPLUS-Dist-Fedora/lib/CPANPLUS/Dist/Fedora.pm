@@ -43,7 +43,6 @@ Name:       [% status.rpmname %]
 Version:    [% status.distvers %]
 Release:    [% status.rpmvers %]%{?dist}
 License:    [% status.license %]
-Group:      Development/Libraries
 Summary:    [% status.summary %]
 Source:     https://cpan.metacpan.org/[% module.path %]/[% status.distname %]-%{version}.[% module.package_extension %]
 Url:        http://metacpan.org/release/[% status.distname %]
